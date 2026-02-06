@@ -30,16 +30,16 @@
     "dashboard",
     "web"
   ],
-  "author": "",
+  "author": "codellyson",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/port-scanner.git"
+    "url": "git+https://github.com/codellyson/port-scanner.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/port-scanner/issues"
+    "url": "https://github.com/codellyson/port-scanner/issues"
   },
-  "homepage": "https://github.com/yourusername/port-scanner#readme",
+  "homepage": "https://github.com/codellyson/port-scanner#readme",
   "engines": {
     "node": ">=18.0.0"
   },

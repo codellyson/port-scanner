@@ -20,23 +20,23 @@ A powerful CLI and web dashboard to list, monitor, and manage running ports on y
 ### Global Installation (Recommended)
 
 ```bash
-npm install -g port-scanner-cli
+pnpm add -g port-scanner-cli
 ```
 
 ### Local Installation
 
 ```bash
-npm install port-scanner-cli
+pnpm add port-scanner-cli
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/port-scanner.git
+git clone https://github.com/codellyson/port-scanner.git
 cd port-scanner
-npm install
-npm run build
-npm link
+pnpm install
+pnpm run build
+pnpm link --global
 ```
 
 ## Usage
@@ -103,8 +103,6 @@ With custom port and host:
 ports web --port 8080 --host 0.0.0.0
 ```
 
-Then open `http://localhost:3000` in your browser.
-
 ### Dashboard Features
 
 - Real-time port listing
@@ -136,42 +134,10 @@ For public deployments, enable demo mode to show sample data instead of real sys
 DEMO_MODE=true ports web
 ```
 
-Or use the npm script:
+Or use the pnpm script:
 
 ```bash
-npm run web:demo
-```
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/ports` | List all ports with optional filters |
-| `GET` | `/api/stats` | Get port statistics |
-| `GET` | `/api/health` | Health check endpoint |
-| `POST` | `/api/kill/:pid` | Kill a process by PID |
-
-### Query Parameters for `/api/ports`
-
-- `port` - Filter by port number
-- `protocol` - Filter by protocol (tcp/udp)
-- `state` - Filter by state
-- `process` - Filter by process name
-- `source` - Filter by source path
-
-### Response Example
-
-```json
-{
-  "success": true,
-  "data": {
-    "ports": [...],
-    "timestamp": "2025-01-01T00:00:00.000Z",
-    "platform": "linux",
-    "total": 10,
-    "demoMode": false
-  }
-}
+pnpm run web:demo
 ```
 
 ## Docker
@@ -205,58 +171,26 @@ When deploying publicly:
 4. **Configure CORS** appropriately for your use case
 5. **Run behind a reverse proxy** (nginx, Caddy) with HTTPS
 
-## Project Structure
-
-```
-port-scanner/
-├── package.json
-├── tsconfig.json
-├── Dockerfile
-├── src/
-│   ├── index.ts              # CLI entry point
-│   ├── config.ts             # Configuration management
-│   ├── core/
-│   │   ├── types.ts          # TypeScript interfaces
-│   │   ├── scanner.ts        # Port scanning logic
-│   │   ├── parser.ts         # System command output parsing
-│   │   └── index.ts
-│   ├── cli/
-│   │   ├── commands.ts       # CLI command definitions
-│   │   ├── formatter.ts      # Output formatting (table/JSON)
-│   │   └── index.ts
-│   └── web/
-│       ├── server.ts         # Express server
-│       ├── routes.ts         # API routes
-│       ├── middleware.ts     # Security middleware
-│       ├── demo-data.ts      # Demo mode sample data
-│       ├── index.ts
-│       └── public/
-│           ├── index.html    # Dashboard HTML
-│           ├── styles.css    # Dashboard styles
-│           └── app.js        # Dashboard JavaScript
-└── dist/                     # Compiled output
-```
-
 ## Development
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Run in development mode
-npm run dev
+pnpm run dev
 
 # Build for production
-npm run build
+pnpm run build
 
 # Start production server
-npm start
+pnpm start
 
 # Start web dashboard
-npm run web
+pnpm run web
 
 # Start in demo mode
-npm run web:demo
+pnpm run web:demo
 ```
 
 ## Requirements
@@ -268,7 +202,7 @@ npm run web:demo
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License
 
 ## Contributing
 
