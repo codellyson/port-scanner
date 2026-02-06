@@ -1,6 +1,6 @@
 {
   "name": "port-scanner-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A powerful CLI and web dashboard to list, monitor, and manage running ports on your system",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
