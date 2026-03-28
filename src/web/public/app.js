@@ -2,7 +2,6 @@
 let allPorts = [];
 let sortColumn = 'port';
 let sortDirection = 'asc';
-let autoRefreshInterval = null;
 
 // DOM Elements
 const portsBody = document.getElementById('portsBody');
@@ -10,15 +9,7 @@ const searchInput = document.getElementById('searchInput');
 const protocolFilter = document.getElementById('protocolFilter');
 const stateFilter = document.getElementById('stateFilter');
 const refreshBtn = document.getElementById('refreshBtn');
-const autoRefreshCheckbox = document.getElementById('autoRefresh');
 const toast = document.getElementById('toast');
-
-// Stats elements
-const totalPorts = document.getElementById('totalPorts');
-const tcpPorts = document.getElementById('tcpPorts');
-const udpPorts = document.getElementById('udpPorts');
-const listeningPorts = document.getElementById('listeningPorts');
-const establishedPorts = document.getElementById('establishedPorts');
 const lastUpdate = document.getElementById('lastUpdate');
 const platform = document.getElementById('platform');
 
@@ -33,7 +24,6 @@ function setupEventListeners() {
   searchInput.addEventListener('input', renderTable);
   protocolFilter.addEventListener('change', renderTable);
   stateFilter.addEventListener('change', renderTable);
-  autoRefreshCheckbox.addEventListener('change', toggleAutoRefresh);
 
   // Sort headers
   document.querySelectorAll('th[data-sort]').forEach(th => {
@@ -69,7 +59,6 @@ async function fetchPorts() {
 
     if (result.success) {
       allPorts = result.data.ports;
-      updateStats(result.data);
       lastUpdate.textContent = `Last updated: ${new Date(result.data.timestamp).toLocaleTimeString()}`;
       platform.textContent = `Platform: ${result.data.platform}`;
       renderTable();
@@ -92,28 +81,15 @@ async function fetchPorts() {
   }
 }
 
-function updateStats(data) {
-  const ports = data.ports;
-  totalPorts.textContent = ports.length;
-  tcpPorts.textContent = ports.filter(p => p.protocol === 'tcp').length;
-  udpPorts.textContent = ports.filter(p => p.protocol === 'udp').length;
-  listeningPorts.textContent = ports.filter(p => p.state.toUpperCase() === 'LISTEN').length;
-  establishedPorts.textContent = ports.filter(p => p.state.toUpperCase() === 'ESTABLISHED').length;
-}
-
 function filterPorts() {
   const search = searchInput.value.toLowerCase();
   const protocol = protocolFilter.value;
   const state = stateFilter.value;
 
   return allPorts.filter(port => {
-    // Protocol filter
     if (protocol && port.protocol !== protocol) return false;
-
-    // State filter
     if (state && !port.state.toUpperCase().includes(state.toUpperCase())) return false;
 
-    // Search filter
     if (search) {
       const searchFields = [
         String(port.port),
@@ -139,11 +115,9 @@ function sortPorts(ports) {
     let aVal = a[sortColumn];
     let bVal = b[sortColumn];
 
-    // Handle null values
     if (aVal === null) aVal = '';
     if (bVal === null) bVal = '';
 
-    // Numeric sort for port and pid
     if (sortColumn === 'port' || sortColumn === 'pid') {
       aVal = Number(aVal) || 0;
       bVal = Number(bVal) || 0;
@@ -176,7 +150,6 @@ function renderTable() {
       <td>${port.remoteAddress || '<span class="text-muted">-</span>'}</td>
       <td class="source-cell" title="${port.source || ''}">${port.source || '<span class="text-muted">-</span>'}</td>
       <td>
-        <button class="copy-btn" onclick="copyPort(${port.port})">Copy</button>
         ${port.pid ? `<button class="kill-btn" onclick="killProcess(${port.pid}, ${port.port}, '${port.process || 'process'}')">Kill</button>` : ''}
       </td>
     </tr>
@@ -190,25 +163,6 @@ function updateSortIndicators() {
       th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
     }
   });
-}
-
-function copyPort(port) {
-  navigator.clipboard.writeText(String(port)).then(() => {
-    showToast(`Port ${port} copied to clipboard`);
-  }).catch(() => {
-    showToast('Failed to copy to clipboard');
-  });
-}
-
-function toggleAutoRefresh() {
-  if (autoRefreshCheckbox.checked) {
-    autoRefreshInterval = setInterval(fetchPorts, 5000);
-    showToast('Auto-refresh enabled');
-  } else {
-    clearInterval(autoRefreshInterval);
-    autoRefreshInterval = null;
-    showToast('Auto-refresh disabled');
-  }
 }
 
 function showToast(message) {
@@ -237,8 +191,6 @@ async function killProcess(pid, port, processName) {
   }
 }
 
-// Make functions available globally
-window.copyPort = copyPort;
 window.killProcess = killProcess;
 
 // Add spin animation for loading state

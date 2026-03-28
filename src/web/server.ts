@@ -2,7 +2,6 @@ import express from 'express';
 import path from 'path';
 import { Server } from 'http';
 import routes from './routes';
-import { rateLimit, cors, securityHeaders } from './middleware';
 import { config } from '../config';
 import chalk from 'chalk';
 
@@ -14,11 +13,6 @@ export function startServer(port?: number, host?: string): void {
 
   const app = express();
 
-  // Security middleware
-  app.use(securityHeaders());
-  app.use(cors({ origins: config.cors.origins, methods: ['GET', 'POST', 'OPTIONS'] }));
-  app.use(rateLimit(config.rateLimit));
-
   // Body parser
   app.use(express.json());
 
@@ -28,9 +22,14 @@ export function startServer(port?: number, host?: string): void {
   // API routes
   app.use(routes);
 
-  // Serve index.html for root
+  // Serve home page at root
   app.get('/', (_req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+
+  // Serve dashboard
+  app.get('/dashboard', (_req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
   });
 
   serverInstance = app.listen(serverPort, serverHost, () => {
@@ -40,13 +39,6 @@ export function startServer(port?: number, host?: string): void {
     console.log(`  ${chalk.bold('Local:')}   http://${serverHost}:${serverPort}`);
     if (serverHost === '0.0.0.0') {
       console.log(`  ${chalk.bold('Network:')} http://<your-ip>:${serverPort}`);
-    }
-    if (config.demoMode) {
-      console.log('');
-      console.log(chalk.yellow('  ⚠ Running in DEMO MODE (using sample data)'));
-    }
-    if (!config.enableKillEndpoint) {
-      console.log(chalk.gray('  ℹ Kill endpoint is disabled'));
     }
     console.log('');
     console.log(chalk.gray('  Press Ctrl+C to stop the server'));

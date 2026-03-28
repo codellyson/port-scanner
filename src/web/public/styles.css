@@ -54,7 +54,6 @@ body {
   color: var(--text-primary);
   line-height: 1.5;
   min-height: 100vh;
-  /* Grid pattern background */
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
@@ -83,10 +82,7 @@ header h1 {
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.025em;
-  background: linear-gradient(to right, var(--color-emerald-400), var(--color-cyan-400));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--color-emerald-400);
 }
 
 .header-actions {
@@ -124,111 +120,6 @@ header h1 {
   background: var(--accent-primary-light);
   border-color: var(--accent-primary-light);
 }
-
-.btn-danger {
-  background: transparent;
-  border-color: var(--accent-danger);
-  color: var(--accent-danger);
-}
-
-.btn-danger:hover {
-  background: var(--accent-danger);
-  color: white;
-}
-
-.btn-icon {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  padding: calc(var(--spacing) * 2) calc(var(--spacing) * 3);
-  font-size: 1rem;
-}
-
-.btn-icon:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--color-zinc-500);
-}
-
-/* Auto refresh toggle */
-.auto-refresh {
-  display: flex;
-  align-items: center;
-  gap: calc(var(--spacing) * 2);
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-
-.auto-refresh input {
-  cursor: pointer;
-  accent-color: var(--accent-primary);
-  width: 16px;
-  height: 16px;
-}
-
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: calc(var(--spacing) * 4);
-  margin-bottom: calc(var(--spacing) * 8);
-}
-
-.stat-card {
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  padding: calc(var(--spacing) * 6);
-  text-align: center;
-  border: 1px solid var(--border-subtle);
-  transition: all 0.15s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--border-color);
-  transition: background 0.15s ease;
-}
-
-.stat-card:hover {
-  border-color: var(--border-color);
-  background: color-mix(in oklab, var(--bg-secondary) 80%, var(--bg-tertiary));
-}
-
-.stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  letter-spacing: -0.025em;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: calc(var(--spacing) * 1);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 500;
-}
-
-/* Stat card accent colors */
-.stat-card.tcp::before { background: var(--accent-success); }
-.stat-card.tcp .stat-value { color: var(--accent-success); }
-
-.stat-card.udp::before { background: var(--accent-info); }
-.stat-card.udp .stat-value { color: var(--accent-info); }
-
-.stat-card.listening::before { background: var(--accent-primary); }
-.stat-card.listening .stat-value { color: var(--accent-primary); }
-
-.stat-card.established::before { background: var(--accent-warning); }
-.stat-card.established .stat-value { color: var(--accent-warning); }
 
 /* Filters */
 .filters {
@@ -427,24 +318,6 @@ td strong {
 }
 
 /* Action Buttons */
-.copy-btn {
-  background: transparent;
-  border: 1px solid var(--border-color);
-  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  font-family: var(--font-sans);
-  transition: all 0.15s ease;
-}
-
-.copy-btn:hover {
-  background: var(--accent-primary);
-  color: var(--color-zinc-950);
-  border-color: var(--accent-primary);
-}
-
 .kill-btn {
   background: transparent;
   border: 1px solid color-mix(in oklab, var(--accent-danger) 50%, transparent);
@@ -455,7 +328,6 @@ td strong {
   color: var(--accent-danger);
   font-family: var(--font-sans);
   transition: all 0.15s ease;
-  margin-left: calc(var(--spacing) * 1);
 }
 
 .kill-btn:hover {
@@ -534,10 +406,6 @@ footer {
     width: 100%;
     justify-content: space-between;
     flex-wrap: wrap;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
   }
 
   th, td {

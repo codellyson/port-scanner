@@ -146,14 +146,14 @@ export function parseLsof(output: string): PortInfo[] {
     const process = parts[0];
     const pid = parseInt(parts[1], 10);
     const user = parts[2];
-    const type = parts[4];
+    const node = parts[7];
     const name = parts.slice(8).join(' ');
 
-    // Determine protocol from type
+    // Determine protocol from NODE column (e.g. TCP, UDP)
     let protocol: 'tcp' | 'udp';
-    if (type.includes('TCP') || name.includes('TCP')) {
+    if (node === 'TCP' || name.includes('TCP')) {
       protocol = 'tcp';
-    } else if (type.includes('UDP') || name.includes('UDP')) {
+    } else if (node === 'UDP' || name.includes('UDP')) {
       protocol = 'udp';
     } else {
       continue;
