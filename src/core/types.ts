@@ -23,3 +23,21 @@ export interface ScanResult {
   timestamp: Date;
   platform: string;
 }
+
+export interface TunnelInfo {
+  port: number;
+  url: string;
+  createdAt: string;
+}
+
+export interface RequestLog {
+  id: string;
+  timestamp: string;
+  method: string;
+  path: string;
+  statusCode: number;
+  duration: number;
+  requestHeaders: Record<string, string | string[] | undefined>;
+  requestBody: string | null;
+  responseBody: string | null;
+}

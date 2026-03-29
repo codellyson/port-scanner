@@ -3,6 +3,7 @@ import path from 'path';
 import { Server } from 'http';
 import routes from './routes';
 import { config } from '../config';
+import { closeAllTunnels } from './tunnelManager';
 import chalk from 'chalk';
 
 let serverInstance: Server | null = null;
@@ -44,9 +45,17 @@ export function startServer(port?: number, host?: string): void {
     console.log(chalk.gray('  Press Ctrl+C to stop the server'));
     console.log('');
   });
+
+  const cleanup = async () => {
+    await closeAllTunnels();
+    process.exit(0);
+  };
+  process.on('SIGINT', cleanup);
+  process.on('SIGTERM', cleanup);
 }
 
-export function stopServer(): Promise<void> {
+export async function stopServer(): Promise<void> {
+  await closeAllTunnels();
   return new Promise((resolve, reject) => {
     if (serverInstance) {
       serverInstance.close((err) => {

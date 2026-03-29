@@ -55,8 +55,8 @@ export function createProgram(): Command {
   program
     .command('web')
     .description('Start the web dashboard')
-    .option('-p, --port <number>', 'Port for the web server', '3000')
-    .option('-h, --host <host>', 'Host to bind to', 'localhost')
+    .option('--port <number>', 'Port for the web server', '3000')
+    .option('--host <host>', 'Host to bind to', 'localhost')
     .action((options) => {
       const port = parseInt(options.port, 10);
       startServer(port, options.host);

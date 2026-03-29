@@ -41,6 +41,20 @@
       font-size: 1rem;
     }
 
+    .demo-video {
+      margin-top: calc(var(--spacing) * 10);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .demo-video video {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-secondary);
+    }
+
     .section {
       margin-bottom: calc(var(--spacing) * 12);
     }
@@ -279,17 +293,45 @@
 
     <div class="hero">
       <h1>Port Scanner</h1>
-      <p>A lean CLI and web dashboard to list active ports and kill processes on your system.</p>
+      <p>List ports, kill processes, expose tunnels, and inspect webhook requests — all from your browser.</p>
       <div class="hero-actions">
         <a href="https://github.com/codellyson/port-scanner" target="_blank" class="btn btn-primary">GitHub</a>
+      </div>
+      <div class="demo-video">
+        <!-- Replace the src with your demo video or gif URL -->
+        <video controls playsinline muted>
+          <source src="" type="video/mp4">
+        </video>
       </div>
     </div>
 
     <div class="why-section">
       <h2>Why This Package</h2>
       <p>If you juggle multiple projects at once, you know the pain. Dev servers pile up, ports collide, and something you forgot to stop three hours ago is still hogging port 3000.</p>
-      <p>I built this because I got tired of the ritual: open a terminal, run <code>lsof</code> or <code>netstat</code>, squint at the output, find the PID, then kill it. Every single time.</p>
-      <p>Port Scanner gives you one command to see every active port and one click to kill what you don't need. That's it. No extras, no ceremony.</p>
+      <p>I got tired of the ritual: run <code>lsof</code>, squint at the output, find the PID, kill it. And when I needed to test a webhook? Open another terminal, run ngrok, copy the URL. Every single time.</p>
+      <p>Port Scanner puts it all in one dashboard. See your ports, kill what you don't need, expose a tunnel, and watch incoming requests without touching the terminal.</p>
+    </div>
+
+    <div class="section">
+      <h2>Features</h2>
+      <div class="usage-grid">
+        <div class="usage-item">
+          <h3>List Ports</h3>
+          <p>See every open port on your system with process name and PID. Filter by protocol, state, or process.</p>
+        </div>
+        <div class="usage-item">
+          <h3>Kill Processes</h3>
+          <p>One click to terminate any process. No more hunting for PIDs in the terminal.</p>
+        </div>
+        <div class="usage-item">
+          <h3>Expose Tunnels</h3>
+          <p>Turn any local port into a public URL via Cloudflare Tunnels. Click "Expose", get a URL, paste it as your webhook endpoint.</p>
+        </div>
+        <div class="usage-item">
+          <h3>Request Logs</h3>
+          <p>Every request hitting your tunnel is logged with method, path, status, headers, and body. Click to expand details.</p>
+        </div>
+      </div>
     </div>
 
     <div class="section">
@@ -327,53 +369,18 @@
       <h2>Usage</h2>
       <div class="usage-grid">
         <div class="usage-item">
-          <h3>List all ports</h3>
-          <p>Scan and display all open ports on the system.</p>
-          <pre><code><span class="cmd">ports</span> list</code></pre>
-        </div>
-
-        <div class="usage-item">
-          <h3>Filter by protocol</h3>
-          <p>Show only TCP or UDP connections.</p>
-          <pre><code><span class="cmd">ports</span> list <span class="flag">--protocol</span> tcp
-<span class="cmd">ports</span> list <span class="flag">-P</span> udp</code></pre>
-        </div>
-
-        <div class="usage-item">
-          <h3>Filter by port</h3>
-          <p>Look up a specific port number.</p>
-          <pre><code><span class="cmd">ports</span> list <span class="flag">--port</span> 3000</code></pre>
-        </div>
-
-        <div class="usage-item">
-          <h3>Filter by state</h3>
-          <p>Show only listening or established connections.</p>
-          <pre><code><span class="cmd">ports</span> list <span class="flag">--state</span> LISTEN</code></pre>
-        </div>
-
-        <div class="usage-item">
-          <h3>Filter by process</h3>
-          <p>Find ports used by a specific process.</p>
-          <pre><code><span class="cmd">ports</span> list <span class="flag">--process</span> node</code></pre>
-        </div>
-
-        <div class="usage-item">
-          <h3>JSON output</h3>
-          <p>Get results as JSON for scripting.</p>
-          <pre><code><span class="cmd">ports</span> list <span class="flag">--json</span></code></pre>
+          <h3>List ports</h3>
+          <p>Scan all open ports. Add filters to narrow results.</p>
+          <pre><code><span class="cmd">ports</span> list
+<span class="cmd">ports</span> list <span class="flag">--protocol</span> tcp <span class="flag">--state</span> LISTEN
+<span class="cmd">ports</span> list <span class="flag">--process</span> node <span class="flag">--json</span></code></pre>
         </div>
 
         <div class="usage-item">
           <h3>Web dashboard</h3>
-          <p>Launch the browser-based dashboard.</p>
+          <p>Launch the dashboard to manage ports, expose tunnels, and view request logs.</p>
           <pre><code><span class="cmd">ports</span> web
 <span class="cmd">ports</span> web <span class="flag">--port</span> 8080</code></pre>
-        </div>
-
-        <div class="usage-item">
-          <h3>Combine filters</h3>
-          <p>Chain multiple filters together.</p>
-          <pre><code><span class="cmd">ports</span> list <span class="flag">--protocol</span> tcp <span class="flag">--state</span> LISTEN</code></pre>
         </div>
       </div>
     </div>
@@ -385,6 +392,7 @@
         <span class="req-badge">Linux: ss or netstat</span>
         <span class="req-badge">macOS: lsof or netstat</span>
         <span class="req-badge">Windows: netstat</span>
+        <span class="req-badge">cloudflared (for tunnels)</span>
       </div>
     </div>
 

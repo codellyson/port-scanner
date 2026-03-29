@@ -51,16 +51,12 @@
             <th data-sort="state">State <span class="sort-icon"></span></th>
             <th data-sort="pid">PID <span class="sort-icon"></span></th>
             <th data-sort="process">Process <span class="sort-icon"></span></th>
-            <th data-sort="user">User <span class="sort-icon"></span></th>
-            <th data-sort="localAddress">Local Address <span class="sort-icon"></span></th>
-            <th data-sort="remoteAddress">Remote Address <span class="sort-icon"></span></th>
-            <th data-sort="source">Source <span class="sort-icon"></span></th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody id="portsBody">
           <tr>
-            <td colspan="10" class="loading">Loading...</td>
+            <td colspan="6" class="loading">Loading...</td>
           </tr>
         </tbody>
       </table>
@@ -70,6 +66,20 @@
       <span id="lastUpdate">Last updated: -</span>
       <span id="platform">Platform: -</span>
     </footer>
+  </div>
+
+  <!-- Logs Panel -->
+  <div id="logsPanel" class="logs-panel">
+    <div class="logs-header">
+      <span id="logsTitle">Request Logs</span>
+      <div class="logs-actions">
+        <button class="btn" onclick="clearLogs()">Clear</button>
+        <button class="btn" onclick="closeLogs()">Close</button>
+      </div>
+    </div>
+    <div id="logsList" class="logs-list">
+      <div class="logs-empty">No requests yet. Send a request to the tunnel URL to see it here.</div>
+    </div>
   </div>
 
   <div id="toast" class="toast"></div>
