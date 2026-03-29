@@ -386,6 +386,25 @@
     </div>
 
     <div class="section">
+      <h2>Install Cloudflared</h2>
+      <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: calc(var(--spacing) * 6);">Required for the tunnel/expose feature. Skip this if you only need port listing and killing.</p>
+      <div class="install-options">
+        <div class="install-card">
+          <h3>Linux / WSL</h3>
+          <pre><code><span class="cmd">curl</span> <span class="flag">-L</span> https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb <span class="flag">-o</span> /tmp/cloudflared.deb && <span class="cmd">sudo</span> dpkg <span class="flag">-i</span> /tmp/cloudflared.deb</code></pre>
+        </div>
+        <div class="install-card">
+          <h3>macOS</h3>
+          <pre><code><span class="cmd">brew</span> install cloudflared</code></pre>
+        </div>
+        <div class="install-card">
+          <h3>Windows (PowerShell)</h3>
+          <pre><code><span class="cmd">winget</span> install Cloudflare.cloudflared</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
       <h2>Requirements</h2>
       <div class="requirements">
         <span class="req-badge">Node.js >= 18</span>
