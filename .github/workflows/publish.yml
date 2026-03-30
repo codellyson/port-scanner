@@ -1,6 +1,9 @@
 name: Publish to npm
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       version:
@@ -42,7 +45,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Bump version
-        run: npm version ${{ inputs.version }}
+        run: npm version ${{ inputs.version || 'patch' }}
 
       - name: Publish to npm
         run: npm publish

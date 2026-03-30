@@ -17,29 +17,32 @@ export function startServer(port?: number, host?: string): void {
   // Body parser
   app.use(express.json());
 
+  const publicDir = path.join(__dirname, 'public');
+
+  // Serve dashboard at both root and /dashboard
+  app.get('/', (_req, res) => {
+    res.sendFile(path.join(publicDir, 'dashboard.html'));
+  });
+
+  app.get('/dashboard', (_req, res) => {
+    res.sendFile(path.join(publicDir, 'dashboard.html'));
+  });
+
   // Serve static files
-  app.use(express.static(path.join(__dirname, 'public')));
+  app.use(express.static(publicDir));
 
   // API routes
   app.use(routes);
 
-  // Serve home page at root
-  app.get('/', (_req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-  });
-
-  // Serve dashboard
-  app.get('/dashboard', (_req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-  });
-
   serverInstance = app.listen(serverPort, serverHost, () => {
+    const baseUrl = serverHost === '0.0.0.0' ? 'localhost' : serverHost;
     console.log('');
     console.log(chalk.green('  Port Scanner Web Dashboard'));
     console.log(chalk.gray('  ─────────────────────────────'));
-    console.log(`  ${chalk.bold('Local:')}   http://${serverHost}:${serverPort}`);
+    console.log(`  ${chalk.bold('Dashboard:')} ${chalk.cyan(`http://${baseUrl}:${serverPort}`)}`);
+
     if (serverHost === '0.0.0.0') {
-      console.log(`  ${chalk.bold('Network:')} http://<your-ip>:${serverPort}`);
+      console.log(`  ${chalk.bold('Network:')}   http://<your-ip>:${serverPort}`);
     }
     console.log('');
     console.log(chalk.gray('  Press Ctrl+C to stop the server'));
