@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { Server } from 'http';
 import routes from './routes';
 import { config } from '../config';
@@ -18,17 +19,18 @@ export function startServer(port?: number, host?: string): void {
   app.use(express.json());
 
   const publicDir = path.join(__dirname, 'public');
+  const dashboardHtml = fs.readFileSync(path.join(publicDir, 'dashboard.html'), 'utf-8');
 
   // Serve dashboard at both root and /dashboard
   app.get('/', (_req, res) => {
-    res.sendFile(path.join(publicDir, 'dashboard.html'));
+    res.type('html').send(dashboardHtml);
   });
 
   app.get('/dashboard', (_req, res) => {
-    res.sendFile(path.join(publicDir, 'dashboard.html'));
+    res.type('html').send(dashboardHtml);
   });
 
-  // Serve static files
+  // Serve static files (css, js)
   app.use(express.static(publicDir));
 
   // API routes
