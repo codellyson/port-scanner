@@ -1,0 +1,35 @@
+[Unit]
+Description=port-scanner tunnel edge
+Documentation=https://github.com/codellyson/port-scanner
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=portscanner
+Group=portscanner
+WorkingDirectory=/opt/portscanner-edge
+EnvironmentFile=/etc/portscanner-edge.env
+ExecStart=/usr/bin/node /opt/portscanner-edge/dist/server.js
+Restart=on-failure
+RestartSec=5
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/portscanner-edge
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

@@ -7,14 +7,22 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Port Scanner</h1>
+      <div class="nameplate">
+        <h1>Port Scanner</h1>
+        <span id="platform" class="plate">-</span>
+      </div>
       <div class="header-actions">
-        <button id="refreshBtn" class="btn btn-primary">
+        <div id="connStatus" class="conn-status" data-state="connecting" role="status" aria-live="polite">
+          <span class="conn-dot" aria-hidden="true"></span>
+          <span id="connLabel">Connecting...</span>
+          <span id="lastUpdate" class="conn-updated"></span>
+        </div>
+        <button id="refreshBtn" class="btn" title="Ports refresh automatically every 5s">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: -2px;">
             <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
             <path d="M3 3v5h5"/>
@@ -26,20 +34,30 @@
       </div>
     </header>
 
+    <div id="edgeNotice" class="edge-notice" role="status" style="display:none"></div>
+
+    <section id="tunnelsSection" class="tunnels-section" style="display:none">
+      <div class="tunnels-header">
+        <h2>Active tunnels <span id="tunnelsCount" class="tunnels-count"></span></h2>
+      </div>
+      <div id="tunnelsList" class="tunnels-list"></div>
+    </section>
+
     <div class="filters">
-      <input type="text" id="searchInput" placeholder="Search ports, processes, addresses...">
+      <input type="text" id="searchInput" autofocus placeholder="Search ports, processes, addresses...  (press /)">
       <select id="protocolFilter">
         <option value="">All Protocols</option>
-        <option value="tcp">TCP</option>
+        <option value="tcp" selected>TCP</option>
         <option value="udp">UDP</option>
       </select>
       <select id="stateFilter">
         <option value="">All States</option>
-        <option value="LISTEN">Listening</option>
+        <option value="LISTEN" selected>Listening</option>
         <option value="ESTABLISHED">Established</option>
         <option value="TIME_WAIT">Time Wait</option>
         <option value="CLOSE_WAIT">Close Wait</option>
       </select>
+      <button id="showAllBtn" class="btn" title="Clear filters and show every socket">Show all</button>
     </div>
 
     <div class="table-container">
@@ -62,10 +80,6 @@
       </table>
     </div>
 
-    <footer>
-      <span id="lastUpdate">Last updated: -</span>
-      <span id="platform">Platform: -</span>
-    </footer>
   </div>
 
   <!-- Logs Panel -->
@@ -82,7 +96,22 @@
     </div>
   </div>
 
-  <div id="toast" class="toast"></div>
+  <div id="confirmSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
+    <div class="sheet-panel">
+      <p class="plate" id="confirmKicker">Confirm</p>
+      <h2 class="sheet-title" id="confirmTitle"></h2>
+      <p class="sheet-body" id="confirmBody"></p>
+      <div class="sheet-actions">
+        <button class="btn" type="button" id="confirmCancel">Cancel</button>
+        <button class="btn btn-danger" type="button" id="confirmOk">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">
+    <span id="toastMessage"></span>
+    <button id="toastClose" class="toast-close" type="button" aria-label="Dismiss">&times;</button>
+  </div>
 
   <script src="app.js"></script>
 </body>

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Port Scanner",
+  "version": "1.0.5",
+  "identifier": "com.codellyson.portscanner",
+  "build": {
+    "beforeBuildCommand": "npm run build && npm run package:sidecar",
+    "beforeDevCommand": "npm run build",
+    "frontendDist": "../src/web/public"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "11.0"
+    }
+  }
+}
