@@ -20,15 +20,33 @@ npm run build
 node dist/index.js web --token <random-string>      # dashboard at http://localhost:<port>?token=...
 ```
 
-Tunnels need the edge:
+Tunnels need `EDGE_WS_URL` and `EDGE_TOKEN` in the server's environment. The
+tray app keeps them in a config file; the quickest way to run the dashboard
+from a terminal is to source that same file, so both paths share one copy of
+the token:
 
 ```bash
-export EDGE_WS_URL="wss://justportscanner.kreativekorna.com/agent"
-export EDGE_TOKEN="<from /etc/portscanner-edge.env on the VPS>"
-node dist/index.js web --token <random-string>
+set -a; . "$HOME/Library/Application Support/com.codellyson.portscanner/edge.env"; set +a
+node dist/index.js web --token "$(openssl rand -hex 16)"
 ```
 
-The dashboard's **Expose** button then creates `https://justportscanner.kreativekorna.com/<id>?t=<32hex>` URLs that auto-reconnect and stream arbitrary-size bodies.
+Or set them yourself, if you would rather not depend on the tray's file:
+
+```bash
+export EDGE_WS_URL="wss://portscanner.kreativekorna.com/agent"
+export EDGE_TOKEN="<from /etc/portscanner-edge.env on the VPS>"
+node dist/index.js web --token "$(openssl rand -hex 16)"
+```
+
+Either way, `GET /api/ports` should report `data.edge` as
+`{"available": true, "missing": []}` — that is the same field the dashboard
+reads to decide whether **Expose** is clickable. If it lists missing keys, the
+server process did not inherit them, and no amount of clicking will help.
+
+**Expose** then creates `https://portscanner.kreativekorna.com/<id>?t=<32hex>`
+URLs that auto-reconnect and stream arbitrary-size bodies. The `t` parameter is
+a per-tunnel access token — anyone with the full URL reaches your local port,
+so treat it as a secret and close the tunnel when you are done.
 
 ## Tray app
 
@@ -37,7 +55,51 @@ npm run tauri:dev      # iterate
 npm run tauri:build    # build the .app / .dmg / installer
 ```
 
-The tray app spawns `node dist/index.js web` as a sidecar. To make tunnels work from the tray, export `EDGE_WS_URL` and `EDGE_TOKEN` in the shell that launches the app (or set them in the login env).
+Tagged builds are produced by [`.github/workflows/release.yml`](.github/workflows/release.yml):
+push a `v*` tag and it bundles for Apple silicon, Intel macOS, Linux and
+Windows on native runners, then attaches them to a draft release. Keep the tag
+in step with the `version` in `src-tauri/tauri.conf.json` and
+`src-tauri/Cargo.toml`.
+
+The bundles are **unsigned**. macOS quarantines a downloaded app that no
+Developer ID vouches for, so first launch needs one of:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/Port Scanner.app"
+```
+
+or right-click the app → Open → Open. To remove the step properly, add an
+Apple Developer ID and notarisation credentials as repository secrets and
+Tauri will sign during the release build.
+
+To build locally:
+
+Both commands build `dist/` and package the server into `src-tauri/binaries/ports-server-<target-triple>` first — that binary is the sidecar the bundled app runs. A bare `cargo check` in `src-tauri/` needs it to exist too, since `externalBin` is verified at build time. During `cargo tauri dev` the app falls back to `node dist/index.js` if the sidecar is missing.
+
+The menu is the whole interface, so it says what is actually happening:
+
+| Item | What it does |
+|---|---|
+| *(first line)* | Server state — starting, `Running · localhost:53421`, or why it stopped and when it retries |
+| *(second line)* | Whether tunnels can work, and which variable is missing if not |
+| Open Dashboard | Opens the dashboard with the session token. Disabled until the server is up |
+| Copy Dashboard URL | Same URL to the clipboard |
+| Restart Server | Stops and restarts, re-reading `edge.env` |
+| Edit Edge Config… | Creates and opens `edge.env` (see below) |
+| Start at Login | Registers a login item. Release builds only |
+| Quit | SIGTERM, up to 2s for the server to close its tunnels, then SIGKILL |
+
+A server that exits on its own is restarted automatically with the same 1/2/4/8/16/30s backoff the tunnel client uses; the menu counts down. After six failures it stops and says so.
+
+### Tunnels from the tray
+
+The tray is launched by the OS, not by your shell, so it never sees `export EDGE_TOKEN=...` from your profile. **Edit Edge Config…** creates and opens:
+
+```
+~/Library/Application Support/com.codellyson.portscanner/edge.env    # macOS
+```
+
+with `EDGE_WS_URL=` and `EDGE_TOKEN=` to fill in. Pick **Restart Server** to apply. A real environment variable of the same name still wins, so launching from a terminal with those exported keeps working unchanged.
 
 ## Edge
 
