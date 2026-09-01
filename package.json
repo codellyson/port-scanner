@@ -17,8 +17,8 @@
     "web:demo": "DEMO_MODE=true node dist/index.js web",
     "package:sidecar": "node scripts/package-sidecar.js",
     "tauri": "cargo tauri",
-    "tauri:dev": "npm run build && npm run package:sidecar && cargo tauri dev",
-    "tauri:build": "npm run build && npm run package:sidecar && cargo tauri build",
+    "tauri:dev": "cargo tauri dev",
+    "tauri:build": "cargo tauri build",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

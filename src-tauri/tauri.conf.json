@@ -5,7 +5,7 @@
   "identifier": "com.codellyson.portscanner",
   "build": {
     "beforeBuildCommand": "npm run build && npm run package:sidecar",
-    "beforeDevCommand": "npm run build",
+    "beforeDevCommand": "npm run build && npm run package:sidecar",
     "frontendDist": "../src/web/public"
   },
   "app": {
@@ -25,6 +25,9 @@
     ],
     "macOS": {
       "minimumSystemVersion": "11.0"
-    }
+    },
+    "externalBin": [
+      "binaries/ports-server"
+    ]
   }
 }

@@ -3,16 +3,17 @@ name = "port-scanner-desktop"
 version = "1.0.5"
 description = "Desktop tray app wrapping the port-scanner web dashboard"
 edition = "2021"
-rust-version = "1.77"
+rust-version = "1.77.2"
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["tray-icon"] }
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
 tauri-plugin-shell = "2"
 tauri-plugin-opener = "2"
 rand = "0.8"
+tauri-plugin-clipboard-manager = "2.3"
 
 [profile.release]
 panic = "abort"
@@ -20,3 +21,9 @@ codegen-units = 1
 lto = true
 opt-level = "s"
 strip = true
+
+[target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
+tauri-plugin-autostart = "2.5"
+
+[target."cfg(unix)".dependencies]
+libc = "0.2.189"
