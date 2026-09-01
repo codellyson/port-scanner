@@ -10,7 +10,7 @@
     "dev": "ts-node src/server.ts"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.5.0"
   },
   "dependencies": {
     "express": "^5.2.1",
