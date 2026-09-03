@@ -87,7 +87,14 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         ],
     )?;
 
-    let icon = Image::from_bytes(include_bytes!("../icons/tray.png"))?;
+    // macOS tints template images from their alpha channel, so tray.png is a
+    // black glyph. Windows and Linux draw the pixels as-is, so they get the
+    // coloured variant instead of an invisible black-on-dark smudge.
+    let icon = if cfg!(target_os = "macos") {
+        Image::from_bytes(include_bytes!("../icons/tray.png"))?
+    } else {
+        Image::from_bytes(include_bytes!("../icons/tray-color.png"))?
+    };
 
     TrayIconBuilder::with_id(TRAY_ID)
         .tooltip(
@@ -98,7 +105,7 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
                 .unwrap_or_else(|_| "Port Scanner".into()),
         )
         .icon(icon)
-        .icon_as_template(true)
+        .icon_as_template(cfg!(target_os = "macos"))
         .menu(&menu)
         .show_menu_on_left_click(true)
         .on_menu_event(on_menu_event)

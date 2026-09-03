@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="36" height="36">
+  <!-- macOS template image: only alpha is used, so everything is black. Regenerate with: cargo tauri icon -p 36 -o <dir> src-tauri/icons/tray.svg -->
+  <g fill="none" stroke="#000" stroke-width="3" stroke-linecap="round">
+    <circle cx="18" cy="18" r="13.5"/>
+    <line x1="18" y1="18" x2="28.4" y2="12"/>
+  </g>
+  <circle cx="18" cy="18" r="2.2" fill="#000"/>
+  <circle cx="24.5" cy="11.5" r="3.4" fill="#000"/>
+</svg>

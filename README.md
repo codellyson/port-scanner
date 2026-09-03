@@ -72,6 +72,27 @@ or right-click the app → Open → Open. To remove the step properly, add an
 Apple Developer ID and notarisation credentials as repository secrets and
 Tauri will sign during the release build.
 
+### Icons
+
+`src-tauri/icons/app-icon.svg` is the only hand-edited app icon; everything
+else in that folder (`icon.icns` for macOS, `icon.ico` for Windows, the PNG
+sizes for Linux and the Windows Store logos) is generated from it:
+
+```bash
+cargo tauri icon src-tauri/icons/app-icon.svg
+```
+
+The menu bar glyph is separate. `tray.svg` is a black template image that
+macOS tints itself; `tray-color.svg` is the coloured version Windows and Linux
+draw as-is. Regenerate their PNGs with:
+
+```bash
+cargo tauri icon -p 36 -o /tmp/tray src-tauri/icons/tray.svg && mv /tmp/tray/36x36.png src-tauri/icons/tray.png
+cargo tauri icon -p 32 -o /tmp/tray src-tauri/icons/tray-color.svg && mv /tmp/tray/32x32.png src-tauri/icons/tray-color.png
+```
+
+The dashboard favicon (`src/web/public/favicon.svg`) is a copy of the app icon.
+
 To build locally:
 
 Both commands build `dist/` and package the server into `src-tauri/binaries/ports-server-<target-triple>` first — that binary is the sidecar the bundled app runs. A bare `cargo check` in `src-tauri/` needs it to exist too, since `externalBin` is verified at build time. During `cargo tauri dev` the app falls back to `node dist/index.js` if the sidecar is missing.
