@@ -3,6 +3,7 @@
 mod sidecar;
 mod state;
 mod tray;
+mod updater;
 
 use rand::distributions::Alphanumeric;
 use rand::Rng;
@@ -23,6 +24,7 @@ fn main() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(AppState::new(generate_token()))
         .setup(|app| {
             #[cfg(target_os = "macos")]
@@ -38,6 +40,7 @@ fn main() {
             // — including failing to start — has somewhere to be reported.
             tray::build(app.handle())?;
             sidecar::spawn(app.handle());
+            updater::schedule(app.handle());
 
             Ok(())
         })

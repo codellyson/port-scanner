@@ -66,11 +66,19 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      # The updater only trusts bundles signed with the key whose public half
+      # is in src-tauri/tauri.conf.json. Without these two secrets the build
+      # fails rather than shipping something the app would refuse to install.
       - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
+          # latest.json is what installed apps poll. It only resolves through
+          # releases/latest/download/ once the draft is published.
+          includeUpdaterJson: true
           releaseName: Port Scanner ${{ github.ref_name }}
           releaseBody: |
             Desktop tray app. Download the bundle for your platform below.

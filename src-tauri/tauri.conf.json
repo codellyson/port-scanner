@@ -30,6 +30,18 @@
     },
     "externalBin": [
       "binaries/ports-server"
-    ]
+    ],
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkyOTk1QjczNDRFODJDMwpSV1REZ2s0MHQ1VXBDU2FWWHdDRFVwS2l5TmVYMmRsZ2VBTCtZc2lSZkJnQ2RNU0lmdytxL2Mycwo=",
+      "endpoints": [
+        "https://github.com/codellyson/port-scanner/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

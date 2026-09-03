@@ -312,7 +312,7 @@ fn detail(reason: String, last_error: Option<String>) -> String {
     }
 }
 
-fn truncate(text: &str, max: usize) -> String {
+pub(crate) fn truncate(text: &str, max: usize) -> String {
     if text.chars().count() <= max {
         return text.to_string();
     }

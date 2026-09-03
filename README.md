@@ -72,6 +72,42 @@ or right-click the app → Open → Open. To remove the step properly, add an
 Apple Developer ID and notarisation credentials as repository secrets and
 Tauri will sign during the release build.
 
+### Updates
+
+The tray menu has a **Check for Updates…** item. It asks
+`https://github.com/codellyson/port-scanner/releases/latest/download/latest.json`
+for the newest published release, and the label changes to say what it found —
+`Up to Date · v1.0.7`, `Install v1.0.8 and Restart`, download progress, or
+why it failed. Nothing installs without a click. A background check runs
+30 seconds after launch and every six hours; it never shows errors, it just
+quietly tries again later. Dev builds show the item disabled.
+
+Updates are minisign-signed. The public key lives in
+`src-tauri/tauri.conf.json`; the private key must never enter the repo. To
+release signed bundles from CI, add two repository secrets:
+
+| Secret | Value |
+|---|---|
+| `TAURI_SIGNING_PRIVATE_KEY` | contents of the private key file |
+| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | its password (empty if none) |
+
+A local `cargo tauri build` needs the key too, since
+`bundle.createUpdaterArtifacts` is on. The bundler reads the key *contents*
+from `TAURI_SIGNING_PRIVATE_KEY`; the `_PATH` variant is only understood by
+`cargo tauri signer sign`, and a build without either silently skips the
+`.sig` files:
+
+```bash
+export TAURI_SIGNING_PRIVATE_KEY="$(cat "$HOME/.tauri/portscanner.key")"
+npm run tauri:build
+```
+
+The release workflow creates a **draft**. Installed apps only see it after
+you publish the draft, so check the bundles first, then publish. Lose the
+private key and no existing install can ever update again — generate a new
+pair with `cargo tauri signer generate -w ~/.tauri/portscanner.key`, swap
+the pubkey in the config, and users reinstall once by hand.
+
 ### Icons
 
 `src-tauri/icons/app-icon.svg` is the only hand-edited app icon; everything

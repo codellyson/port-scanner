@@ -14,6 +14,7 @@ use tauri_plugin_opener::OpenerExt;
 
 use crate::sidecar;
 use crate::state::AppState;
+use crate::updater;
 
 const TRAY_ID: &str = "main";
 
@@ -24,6 +25,7 @@ pub struct MenuHandles {
     open: MenuItem<Wry>,
     copy: MenuItem<Wry>,
     autostart: CheckMenuItem<Wry>,
+    update: MenuItem<Wry>,
 }
 
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
@@ -68,6 +70,9 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         None::<&str>,
     )?;
 
+    let (update_label, update_enabled) = update_menu_item(app);
+    let update = MenuItem::with_id(app, "update", update_label, update_enabled, None::<&str>)?;
+
     let quit = MenuItem::with_id(app, "quit", "Quit Port Scanner", true, None::<&str>)?;
 
     let menu = Menu::with_items(
@@ -82,6 +87,8 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
             &restart,
             &edge,
             &autostart,
+            &PredefinedMenuItem::separator(app)?,
+            &update,
             &PredefinedMenuItem::separator(app)?,
             &quit,
         ],
@@ -119,6 +126,7 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         open,
         copy,
         autostart,
+        update,
     };
     let _ = app.state::<AppState>().menu.set(handles);
 
@@ -152,6 +160,10 @@ pub fn refresh(app: &AppHandle) {
     let _ = menu.tunnels.set_text(sidecar::edge_config(app).status_line());
     let _ = menu.open.set_enabled(ready);
     let _ = menu.copy.set_enabled(ready);
+
+    let (update_label, update_enabled) = update_menu_item(app);
+    let _ = menu.update.set_text(update_label);
+    let _ = menu.update.set_enabled(update_enabled);
 
     if let Some(tray) = app.tray_by_id(TRAY_ID) {
         let _ = tray.set_tooltip(Some(tooltip));
@@ -193,10 +205,26 @@ fn on_menu_event(app: &AppHandle, event: tauri::menu::MenuEvent) {
 
         "autostart" => toggle_autostart(app),
 
+        "update" => updater::on_menu_click(app),
+
         "quit" => sidecar::quit(app),
 
         _ => {}
     }
+}
+
+/// Label and enabled flag for the updater item. The lock is released before
+/// this returns, so callers can hand the result to a menu API safely.
+fn update_menu_item(app: &AppHandle) -> (String, bool) {
+    if !updater::SUPPORTED {
+        return ("Check for Updates (release builds only)".into(), false);
+    }
+    let version = app.package_info().version.to_string();
+    app.state::<AppState>()
+        .update
+        .lock()
+        .map(|update| update.menu_item(&version))
+        .unwrap_or_else(|_| ("Check for Updates…".into(), false))
 }
 
 #[cfg(all(desktop, not(debug_assertions)))]

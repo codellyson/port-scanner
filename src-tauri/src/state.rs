@@ -2,8 +2,10 @@ use std::sync::atomic::{AtomicU32, AtomicU64};
 use std::sync::{Mutex, OnceLock};
 
 use tauri_plugin_shell::process::CommandChild;
+use tauri_plugin_updater::Update;
 
 use crate::tray::MenuHandles;
+use crate::updater::UpdateState;
 
 /// What the server is actually doing, as far as the tray knows. Every variant
 /// is something the menu can say out loud — the tray never shows a state it
@@ -25,7 +27,7 @@ impl ServerState {
     pub fn status_line(&self) -> String {
         match self {
             ServerState::Starting => "Starting server…".into(),
-            ServerState::Ready { url } => format!("Running · {}", strip_scheme(url)),
+            ServerState::Ready { .. } => "Running".into(),
             ServerState::Restarting { in_seconds, reason } => {
                 format!("{reason} · retrying in {in_seconds}s")
             }
@@ -46,12 +48,6 @@ impl ServerState {
     }
 }
 
-fn strip_scheme(url: &str) -> &str {
-    url.strip_prefix("http://")
-        .or_else(|| url.strip_prefix("https://"))
-        .unwrap_or(url)
-}
-
 pub struct AppState {
     /// Bearer token minted once per app run and handed to the sidecar. Every
     /// restart reuses it, so a dashboard tab survives a restart.
@@ -65,6 +61,10 @@ pub struct AppState {
     /// Consecutive unexpected exits. Reset by a READY line.
     pub restarts: AtomicU32,
     pub menu: OnceLock<MenuHandles>,
+    /// What the updater is doing; the menu item's label is derived from it.
+    pub update: Mutex<UpdateState>,
+    /// A release the last check found, kept until the user asks to install it.
+    pub pending_update: Mutex<Option<Update>>,
 }
 
 impl AppState {
@@ -76,6 +76,8 @@ impl AppState {
             generation: AtomicU64::new(0),
             restarts: AtomicU32::new(0),
             menu: OnceLock::new(),
+            update: Mutex::new(UpdateState::Idle),
+            pending_update: Mutex::new(None),
         }
     }
 
