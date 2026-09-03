@@ -104,10 +104,14 @@ export TAURI_SIGNING_PRIVATE_KEY_PASSWORD=""
 npm run tauri:build
 ```
 
-The release workflow uploads to a draft and publishes it automatically once
-all four platforms have finished. If any platform fails, it stays a draft —
+The release workflow creates a draft first, has the four platform builds
+upload into it, and publishes it once all of them have finished. If any platform fails, it stays a draft —
 installed apps never see a release missing their bundle — and you can
-re-run the failed job or publish by hand after fixing it. Lose the
+re-run the failed job or publish by hand after fixing it. If the very first
+`draft` job fails with "Resource not accessible by integration", GitHub is
+refusing to let the workflow token create releases; add a fine-grained
+personal token with *Contents: read and write* on this repo as the
+`RELEASE_TOKEN` secret and the workflow uses it instead. Lose the
 private key and no existing install can ever update again — generate a new
 pair with `cargo tauri signer generate -w ~/.tauri/portscanner.key`, swap
 the pubkey in the config, and users reinstall once by hand.

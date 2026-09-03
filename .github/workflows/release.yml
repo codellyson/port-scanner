@@ -12,7 +12,38 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Create the draft up front. tauri-action can upload to an existing draft
+  # but its own create-release call has started failing with "Resource not
+  # accessible by integration" even though the job token has contents:write;
+  # doing it here fails in seconds instead of after four ten-minute builds,
+  # and can fall back to a personal token (RELEASE_TOKEN secret) if the
+  # built-in one is refused.
+  draft:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create the draft release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; leaving it alone."
+            exit 0
+          fi
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft \
+            --title "Port Scanner $TAG" \
+            --notes "Desktop tray app. Download the bundle for your platform below.
+
+          macOS builds are unsigned — see the README for the one-time
+          Gatekeeper step, or sign them by adding APPLE_* secrets here."
+
   bundle:
+    # `always()` so manual runs, which skip `draft`, still build.
+    needs: draft
+    if: always() && (needs.draft.result == 'success' || needs.draft.result == 'skipped')
     permissions:
       contents: write
 
@@ -102,12 +133,12 @@ jobs:
   # build a release named after the branch, which is never worth publishing.
   publish:
     needs: bundle
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') && needs.bundle.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - name: Publish the release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
         run: gh release edit "${{ github.ref_name }}" --repo "${{ github.repository }}" --draft=false
