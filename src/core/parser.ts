@@ -159,14 +159,32 @@ export function parseLsof(output: string): PortInfo[] {
       continue;
     }
 
-    // Parse address and port from NAME (format: host:port or host:port->remote:port)
-    const addrMatch = name.match(/([^:]+):(\d+)/);
-    if (!addrMatch) continue;
+    // Parse address and port from NAME. Possible shapes:
+    //   *:53                            (any v4)
+    //   127.0.0.1:5432                  (v4)
+    //   [::1]:6379                      (v6 bracketed)
+    //   [ff02::1]:9875                  (v6 multicast — older bug parsed
+    //                                    `[ff02` + `:1` and treated 1 as port)
+    //   192.168.1.5:54321->1.2.3.4:443  (v4 with remote)
+    //   [::1]:54321->[::1]:443          (v6 with remote)
+    //
+    // The local-side ends at either the first ` ` or `->`.
+    const localPart = name.split(/->|\s/)[0];
+    let localAddress: string;
+    let port: number;
+    const v6 = localPart.match(/^\[([^\]]+)\]:(\d+)$/);
+    const v4 = localPart.match(/^([^:]+):(\d+)$/);
+    if (v6) {
+      localAddress = v6[1];
+      port = parseInt(v6[2], 10);
+    } else if (v4) {
+      localAddress = v4[1];
+      port = parseInt(v4[2], 10);
+    } else {
+      // Skip lines we can't parse confidently (raw sockets, no port, etc.)
+      continue;
+    }
 
-    const localAddress = addrMatch[1];
-    const port = parseInt(addrMatch[2], 10);
-
-    // Parse state and remote address
     let state = 'UNKNOWN';
     let remoteAddress: string | null = null;
 
@@ -180,9 +198,13 @@ export function parseLsof(output: string): PortInfo[] {
       state = 'TIME_WAIT';
     }
 
-    const remoteMatch = name.match(/->([^:]+:\d+)/);
-    if (remoteMatch) {
-      remoteAddress = remoteMatch[1];
+    // Remote may also be bracketed v6.
+    const remoteV6 = name.match(/->\[([^\]]+)\]:(\d+)/);
+    const remoteV4 = name.match(/->([^:\s]+):(\d+)/);
+    if (remoteV6) {
+      remoteAddress = `[${remoteV6[1]}]:${remoteV6[2]}`;
+    } else if (remoteV4) {
+      remoteAddress = `${remoteV4[1]}:${remoteV4[2]}`;
     }
 
     ports.push({

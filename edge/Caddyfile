@@ -1,0 +1,28 @@
+# Caddyfile for the port-scanner tunnel edge.
+#
+# Replace `tunnel.example.com` everywhere with your real apex.
+# You need wildcard TLS (DNS-01 challenge) for `*.tunnel.example.com`.
+# Pick the Caddy DNS plugin matching your registrar (cloudflare, route53, etc.)
+# and set the provider's API token via env.
+#
+# Build Caddy with the DNS plugin baked in:
+#   xcaddy build --with github.com/caddy-dns/cloudflare
+# (Replace `cloudflare` with your provider's plugin path.)
+
+{
+	# Optional: redirect ACME challenge logs to journald
+	# email you@example.com
+}
+
+# Agent WebSocket lives under the apex.
+tunnel.example.com {
+	reverse_proxy 127.0.0.1:8443
+}
+
+# Public tunnel traffic. Wildcard cert via DNS-01.
+*.tunnel.example.com {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+	reverse_proxy 127.0.0.1:8443
+}

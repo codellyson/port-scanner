@@ -1,105 +1,44 @@
-# Port Scanner
+# port-scanner
 
-A lean CLI and web dashboard to list ports, kill processes, expose tunnels, and inspect webhook requests — all from your browser.
+Personal port utility. Lists local sockets, kills processes, and exposes any local port through a self-hosted WebSocket tunnel edge. Drives a macOS/Linux/Windows tray app.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
+Not published on npm. Cloned + built + run locally.
 
-## Features
+## Layout
 
-- **List Ports** — See every open port with process name and PID
-- **Kill Processes** — One click to terminate any process
-- **Expose Tunnels** — Turn any local port into a public URL via Cloudflare Tunnels
-- **Request Logs** — Inspect every incoming request with method, path, status, headers, and body
+| Path | What it is |
+|---|---|
+| `src/` | CLI (`ports list`, `ports kill`, `ports web`) and the Express dashboard |
+| `src-tauri/` | Tray app that wraps the web server and starts it on login |
+| `edge/` | Tiny Express + `ws` reverse-proxy tunnel edge that runs on the VPS |
 
-## Installation
-
-### Global (Recommended)
+## Run locally
 
 ```bash
-# npm
-npm install -g port-scanner-cli
-
-# pnpm
-pnpm add -g port-scanner-cli
-
-# yarn
-yarn global add port-scanner-cli
+npm install
+npm run build
+node dist/index.js web --token <random-string>      # dashboard at http://localhost:<port>?token=...
 ```
 
-### Local
+Tunnels need the edge:
 
 ```bash
-# npm
-npm install port-scanner-cli
-
-# pnpm
-pnpm add port-scanner-cli
-
-# yarn
-yarn add port-scanner-cli
+export EDGE_WS_URL="wss://justportscanner.kreativekorna.com/agent"
+export EDGE_TOKEN="<from /etc/portscanner-edge.env on the VPS>"
+node dist/index.js web --token <random-string>
 ```
 
-### Install Cloudflared (for tunnels)
+The dashboard's **Expose** button then creates `https://justportscanner.kreativekorna.com/<id>?t=<32hex>` URLs that auto-reconnect and stream arbitrary-size bodies.
 
-Required only if you want to expose local ports as public URLs.
+## Tray app
 
 ```bash
-# Linux / WSL
-curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o /tmp/cloudflared.deb && sudo dpkg -i /tmp/cloudflared.deb
-
-# macOS
-brew install cloudflared
-
-# Windows (PowerShell)
-winget install Cloudflare.cloudflared
+npm run tauri:dev      # iterate
+npm run tauri:build    # build the .app / .dmg / installer
 ```
 
-## Usage
+The tray app spawns `node dist/index.js web` as a sidecar. To make tunnels work from the tray, export `EDGE_WS_URL` and `EDGE_TOKEN` in the shell that launches the app (or set them in the login env).
 
-### CLI
+## Edge
 
-```bash
-# List all ports
-ports list
-
-# Filter by protocol, state, or process
-ports list --protocol tcp --state LISTEN
-ports list --process node --json
-
-# Launch the web dashboard
-ports web
-ports web --port 8080
-```
-
-### Web Dashboard
-
-Start the dashboard and open it in your browser:
-
-```bash
-ports web
-```
-
-From the dashboard you can:
-
-- **Filter and sort** ports by protocol, state, or search
-- **Kill** any process with one click
-- **Expose** a listening port as a public URL (via Cloudflare Tunnels)
-- **Copy** the tunnel URL to your clipboard
-- **View request logs** — see every request hitting your tunnel with method, path, status, headers, and body
-
-## Requirements
-
-- Node.js 18+
-- Linux: `ss` or `netstat`
-- macOS: `lsof` or `netstat`
-- Windows: `netstat`
-- `cloudflared` (optional, for tunnel feature)
-
-## License
-
-MIT License
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+See [`edge/`](./edge/). Containerized, deployed on the VPS via Aeroplane. Exposes `/_ping` (liveness) and `/_health` (JSON status). Protocol is documented inline in `edge/src/server.ts` and `src/web/tunnelManager.ts`.

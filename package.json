@@ -1,7 +1,8 @@
 {
   "name": "port-scanner-cli",
   "version": "1.0.5",
-  "description": "A powerful CLI and web dashboard to list, monitor, and manage running ports on your system",
+  "private": true,
+  "description": "Personal port utility + self-hosted tunnel edge. Not published.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -14,8 +15,20 @@
     "dev": "ts-node src/index.ts",
     "web": "node dist/index.js web",
     "web:demo": "DEMO_MODE=true node dist/index.js web",
+    "package:sidecar": "node scripts/package-sidecar.js",
+    "tauri": "cargo tauri",
+    "tauri:dev": "npm run build && npm run package:sidecar && cargo tauri dev",
+    "tauri:build": "npm run build && npm run package:sidecar && cargo tauri build",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "pkg": {
+    "assets": [
+      "dist/web/public/**/*"
+    ],
+    "scripts": [
+      "dist/**/*.js"
+    ]
   },
   "keywords": [
     "port",
@@ -51,11 +64,14 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^14.0.3",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.1",
+    "@types/ws": "^8.18.1",
+    "@yao-pkg/pkg": "^6.20.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

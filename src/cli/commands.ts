@@ -55,11 +55,16 @@ export function createProgram(): Command {
   program
     .command('web')
     .description('Start the web dashboard')
-    .option('--port <number>', 'Port for the web server', '3000')
+    .option('--port <number>', 'Port for the web server (0 = OS picks a free port)', '3000')
     .option('--host <host>', 'Host to bind to', 'localhost')
+    .option('--token <secret>', 'Require this bearer token on all /api/* requests')
+    .option('--emit-ready', 'Emit a machine-readable READY line on stdout (for embedding)')
     .action((options) => {
       const port = parseInt(options.port, 10);
-      startServer(port, options.host);
+      startServer(port, options.host, {
+        token: options.token ?? null,
+        emitReadyLine: Boolean(options.emitReady),
+      });
     });
 
   // Default action when no command is provided

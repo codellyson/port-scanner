@@ -1,45 +1,57 @@
 :root {
-  /* Color palette from envii.dev */
-  --color-zinc-100: oklch(96.7% 0.001 286.375);
-  --color-zinc-200: oklch(92% 0.004 286.32);
-  --color-zinc-300: oklch(87.1% 0.006 286.286);
-  --color-zinc-400: oklch(70.5% 0.015 286.067);
-  --color-zinc-500: oklch(55.2% 0.016 285.938);
-  --color-zinc-600: oklch(44.2% 0.017 285.786);
-  --color-zinc-700: oklch(37% 0.013 285.805);
-  --color-zinc-800: oklch(27.4% 0.006 286.033);
-  --color-zinc-900: oklch(21% 0.006 285.885);
-  --color-zinc-950: oklch(14.1% 0.005 285.823);
+  /* Ground: one cold neutral for the street, one warm for the masonry */
+  --color-ink: #0B0B0D;
+  --color-asphalt: #101014;
+  --color-concrete: #16161A;
+  --color-brick: #241A16;
+  --color-brick-deep: #191210;
 
-  --color-emerald-400: oklch(76.5% 0.177 163.223);
-  --color-emerald-500: oklch(69.6% 0.17 162.48);
-  --color-yellow-400: oklch(85.2% 0.199 91.936);
-  --color-yellow-500: oklch(79.5% 0.184 86.047);
-  --color-amber-500: oklch(76.9% 0.188 70.08);
-  --color-cyan-400: oklch(78.9% 0.154 211.53);
+  /* Reading: paper under a work lamp, never screen white */
+  --color-chalk: #F1EDE5;
+  --color-plaster: #C7C1B6;
+  --color-dust: #8A857C;
+
+  /* Signage. Three colours, one meaning each, used rarely.
+     jade    - local and healthy: listening, stream connected
+     sodium  - lit and exposed: tunnels, hours, anything in motion
+     vermilion - the painted door: destruction and failure */
+  --color-jade: #4FB093;
+  --color-sodium: #E7A23C;
+  --color-sodium-light: #F3BC68;
+  --color-vermilion: #E04A32;
 
   /* Theme variables */
-  --bg-primary: var(--color-zinc-950);
-  --bg-secondary: var(--color-zinc-900);
-  --bg-tertiary: var(--color-zinc-800);
-  --text-primary: var(--color-zinc-100);
-  --text-secondary: var(--color-zinc-400);
-  --text-muted: var(--color-zinc-500);
-  --border-color: var(--color-zinc-700);
-  --border-subtle: var(--color-zinc-800);
-  --accent-primary: var(--color-emerald-500);
-  --accent-primary-light: var(--color-emerald-400);
-  --accent-success: var(--color-emerald-400);
-  --accent-warning: var(--color-yellow-400);
-  --accent-danger: #ef4444;
-  --accent-info: var(--color-cyan-400);
+  --bg-primary: var(--color-ink);
+  --bg-secondary: var(--color-asphalt);
+  --bg-tertiary: var(--color-concrete);
+  --text-primary: var(--color-chalk);
+  --text-secondary: var(--color-plaster);
+  --text-muted: var(--color-dust);
+  --border-color: rgba(199, 193, 182, 0.16);
+  --border-subtle: rgba(199, 193, 182, 0.08);
+  --border-strong: rgba(199, 193, 182, 0.32);
+  --accent-primary: var(--color-sodium);
+  --accent-primary-light: var(--color-sodium-light);
+  --accent-success: var(--color-jade);
+  --accent-warning: var(--color-sodium);
+  --accent-danger: var(--color-vermilion);
+  --accent-info: var(--color-plaster);
 
-  /* Fonts */
-  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* Fonts: a display face with history for the nameplate, a grotesque for
+     brass-plate labels, mono for anything you read as data */
+  --font-display: "Bodoni Moda", "Didot", Georgia, serif;
+  --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+
+  /* Weighted, like a heavy door on a good hinge */
+  --door: cubic-bezier(0.2, 0.7, 0.15, 1);
 
   /* Spacing */
   --spacing: 0.25rem;
+
+  /* Renders the browser's own popups and controls dark, so the select's
+     option list matches the page instead of arriving as a white sheet */
+  color-scheme: dark;
 }
 
 * {
@@ -55,9 +67,24 @@ body {
   line-height: 1.5;
   min-height: 100vh;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 48px 48px;
+    radial-gradient(120% 70% at 6% -10%, rgba(231, 162, 60, 0.07), transparent 62%),
+    radial-gradient(90% 60% at 100% 0%, rgba(36, 26, 22, 0.85), transparent 58%),
+    linear-gradient(rgba(199, 193, 182, 0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(199, 193, 182, 0.016) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 96px 96px, 96px 96px;
+  background-attachment: fixed, fixed, scroll, scroll;
+}
+
+/* Grain: the page is photographed under a work lamp, not printed */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.13;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .container {
@@ -75,14 +102,33 @@ header {
   flex-wrap: wrap;
   gap: calc(var(--spacing) * 4);
   padding-bottom: calc(var(--spacing) * 6);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-color);
 }
 
 header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  color: var(--color-emerald-400);
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.4rem + 1vw, 2.375rem);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.nameplate {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--spacing) * 4);
+  flex-wrap: wrap;
+}
+
+/* Brass-plate label: small, letterspaced, never explains itself */
+.plate {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .header-actions {
@@ -91,15 +137,72 @@ header h1 {
   gap: calc(var(--spacing) * 4);
 }
 
+/* Live/stale indicator for the SSE stream */
+.conn-status {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  cursor: default;
+}
+
+.conn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.conn-status[data-state="live"] .conn-dot {
+  background: var(--accent-success);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-success) 20%, transparent);
+}
+
+.conn-status[data-state="stale"] .conn-dot {
+  background: var(--accent-warning);
+  animation: conn-pulse 1.4s ease-in-out infinite;
+}
+
+.conn-status[data-state="stale"] {
+  color: var(--accent-warning);
+}
+
+.conn-updated {
+  color: var(--text-muted);
+}
+
+.conn-updated:not(:empty)::before {
+  content: "· ";
+}
+
+@keyframes conn-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Banner shown when the tunnel edge isn't configured */
+.edge-notice {
+  margin-bottom: calc(var(--spacing) * 6);
+  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
+  border: 1px solid color-mix(in oklab, var(--accent-warning) 40%, transparent);
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--accent-warning) 8%, transparent);
+  color: var(--accent-warning);
+  font-size: 0.8125rem;
+}
+
 /* Buttons */
 .btn {
   padding: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 2px;
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 500;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.28s var(--door);
   font-family: var(--font-sans);
   background: var(--bg-secondary);
   color: var(--text-primary);
@@ -107,18 +210,121 @@ header h1 {
 
 .btn:hover {
   background: var(--bg-tertiary);
-  border-color: var(--color-zinc-600);
+  border-color: var(--border-strong);
 }
 
 .btn-primary {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
-  color: var(--color-zinc-950);
+  color: var(--color-ink);
 }
 
 .btn-primary:hover {
   background: var(--accent-primary-light);
   border-color: var(--accent-primary-light);
+}
+
+/* Tunnels overview */
+.tunnels-section {
+  margin-bottom: calc(var(--spacing) * 6);
+}
+
+.tunnels-header h2 {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--text-muted);
+  margin: 0 0 calc(var(--spacing) * 3) 0;
+}
+
+.tunnels-count {
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-left: calc(var(--spacing));
+}
+
+.tunnels-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: calc(var(--spacing) * 3);
+}
+
+.tunnel-card {
+  background: linear-gradient(180deg, rgba(36, 26, 22, 0.5), var(--bg-secondary));
+  border: 1px solid color-mix(in oklab, var(--color-sodium) 22%, transparent);
+  border-radius: 2px;
+  padding: calc(var(--spacing) * 4);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing) * 3);
+}
+
+.tunnel-card-head {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+}
+
+.tunnel-port {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tunnel-proc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.tunnel-status {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+.status-live {
+  background: color-mix(in oklab, var(--color-sodium) 14%, transparent);
+  color: var(--color-sodium);
+}
+
+.status-reconnecting {
+  background: color-mix(in oklab, var(--color-sodium) 8%, transparent);
+  color: color-mix(in oklab, var(--color-sodium) 65%, var(--color-dust));
+  animation: gutter 2.2s ease-in-out infinite;
+}
+
+@keyframes gutter {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.tunnel-card-url {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--accent-primary);
+  text-decoration: none;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.tunnel-card-url:hover {
+  text-decoration: underline;
+}
+
+.tunnel-card-actions {
+  display: flex;
+  gap: calc(var(--spacing) * 2);
+}
+
+.tunnel-card-actions .btn {
+  font-size: 0.75rem;
+  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 3);
 }
 
 /* Filters */
@@ -133,12 +339,12 @@ header h1 {
 .filters select {
   padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 2px;
   font-size: 0.875rem;
   background: var(--bg-secondary);
   color: var(--text-primary);
   font-family: var(--font-sans);
-  transition: all 0.15s ease;
+  transition: all 0.28s var(--door);
 }
 
 .filters input {
@@ -153,23 +359,54 @@ header h1 {
 .filters input:focus,
 .filters select:focus {
   outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent-primary) 20%, transparent);
+  border-color: color-mix(in oklab, var(--color-sodium) 70%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-sodium) 10%, transparent);
 }
 
 .filters select {
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
+  padding-right: calc(var(--spacing) * 10);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 9 6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' fill='none' stroke='%23C7C1B6' stroke-width='1.2' stroke-linecap='square'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right calc(var(--spacing) * 4) center;
+  background-size: 9px 6px;
+}
+
+.filters select:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
 }
 
 .filters select option {
-  background: var(--bg-secondary);
+  background: var(--color-asphalt);
   color: var(--text-primary);
+  font-family: var(--font-sans);
+  letter-spacing: normal;
+}
+
+.filters input {
+  caret-color: var(--color-sodium);
+}
+
+/* Keep autofill from repainting the field in the browser's yellow */
+.filters input:-webkit-autofill,
+.filters input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-primary);
+  caret-color: var(--color-sodium);
+  box-shadow: 0 0 0 1000px var(--bg-secondary) inset;
 }
 
 /* Table Container */
 .table-container {
   background: var(--bg-secondary);
-  border-radius: 8px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid var(--border-subtle);
   overflow-x: auto;
@@ -188,15 +425,16 @@ th, td {
 
 th {
   background: var(--bg-primary);
-  font-weight: 600;
-  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.6875rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.2em;
   color: var(--text-muted);
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all 0.28s var(--door);
   position: sticky;
   top: 0;
 }
@@ -207,20 +445,34 @@ th:hover {
 }
 
 th .sort-icon {
-  margin-left: calc(var(--spacing) * 1);
-  opacity: 0.5;
-  font-size: 0.625rem;
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: calc(var(--spacing) * 2);
+  vertical-align: 1px;
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-bottom: 4px solid currentColor;
+  opacity: 0.2;
+  transition: opacity 0.28s var(--door), transform 0.28s var(--door), border-bottom-color 0.28s var(--door);
 }
 
-th.sorted-asc .sort-icon::after { content: '\25B2'; color: var(--accent-primary); opacity: 1; }
-th.sorted-desc .sort-icon::after { content: '\25BC'; color: var(--accent-primary); opacity: 1; }
+th:hover .sort-icon { opacity: 0.45; }
+
+th.sorted-asc .sort-icon,
+th.sorted-desc .sort-icon {
+  opacity: 1;
+  border-bottom-color: var(--color-sodium);
+}
+
+th.sorted-desc .sort-icon { transform: rotate(180deg); }
 
 tbody tr {
-  transition: background 0.15s ease;
+  transition: background 0.28s var(--door);
 }
 
 tbody tr:hover {
-  background: color-mix(in oklab, var(--bg-tertiary) 30%, transparent);
+  background: color-mix(in oklab, var(--color-brick) 55%, transparent);
 }
 
 tbody tr:last-child td {
@@ -228,8 +480,9 @@ tbody tr:last-child td {
 }
 
 td {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
 
@@ -246,62 +499,60 @@ td strong {
   font-family: var(--font-sans);
 }
 
-/* Protocol Colors */
+/* Protocol is a fact, not a state, so it carries no signage colour */
 .protocol-tcp {
-  color: var(--accent-success);
-  font-weight: 600;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .protocol-udp {
-  color: var(--accent-info);
-  font-weight: 600;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
-/* State Colors */
-.state-listen {
-  color: var(--accent-success);
-  background: color-mix(in oklab, var(--accent-success) 10%, transparent);
-  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.state-established {
-  color: var(--accent-primary);
-  background: color-mix(in oklab, var(--accent-primary) 10%, transparent);
-  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.state-time_wait {
-  color: var(--accent-warning);
-  background: color-mix(in oklab, var(--accent-warning) 10%, transparent);
-  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.state-close_wait {
-  color: var(--accent-warning);
-  background: color-mix(in oklab, var(--accent-warning) 10%, transparent);
-  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
+/* State: a lamp, not a label. The dot carries the colour so a hundred
+   listening rows read as a panel of lights rather than a wall of badges. */
+.state-listen,
+.state-established,
+.state-time_wait,
+.state-close_wait,
 .state-closed {
-  color: var(--accent-danger);
-  background: color-mix(in oklab, var(--accent-danger) 10%, transparent);
-  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
 }
+
+.state-listen::before,
+.state-established::before,
+.state-time_wait::before,
+.state-close_wait::before,
+.state-closed::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.state-listen::before {
+  background: var(--color-jade);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-jade) 16%, transparent);
+}
+
+.state-established { color: var(--text-secondary); }
+.state-established::before {
+  background: var(--color-sodium);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-sodium) 16%, transparent);
+}
+
+.state-closed { color: var(--accent-danger); }
+.state-closed::before { background: var(--accent-danger); }
 
 .text-muted {
   color: var(--text-muted);
@@ -318,16 +569,49 @@ td strong {
 }
 
 /* Action Buttons */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.kill-btn:disabled:hover {
+  background: transparent;
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+
+.stop-tunnel-btn:disabled:hover {
+  background: transparent;
+  color: var(--accent-danger);
+  border-color: color-mix(in oklab, var(--accent-danger) 50%, transparent);
+}
+
+.expose-btn:disabled:hover {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+.btn:disabled:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.btn-primary:disabled:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
 .kill-btn {
   background: transparent;
-  border: 1px solid color-mix(in oklab, var(--accent-danger) 50%, transparent);
+  border: 1px solid var(--border-color);
   padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
-  border-radius: 4px;
+  border-radius: 2px;
   cursor: pointer;
   font-size: 0.75rem;
-  color: var(--accent-danger);
+  color: var(--text-muted);
   font-family: var(--font-sans);
-  transition: all 0.15s ease;
+  transition: all 0.28s var(--door);
 }
 
 .kill-btn:hover {
@@ -338,32 +622,32 @@ td strong {
 
 .expose-btn {
   background: transparent;
-  border: 1px solid color-mix(in oklab, var(--accent-info) 50%, transparent);
+  border: 1px solid var(--border-color);
   padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
-  border-radius: 4px;
+  border-radius: 2px;
   cursor: pointer;
   font-size: 0.75rem;
-  color: var(--accent-info);
+  color: var(--text-secondary);
   font-family: var(--font-sans);
-  transition: all 0.15s ease;
+  transition: all 0.28s var(--door);
 }
 
 .expose-btn:hover {
-  background: var(--accent-info);
-  color: var(--color-zinc-950);
-  border-color: var(--accent-info);
+  background: var(--color-sodium);
+  color: var(--color-ink);
+  border-color: var(--color-sodium);
 }
 
 .stop-tunnel-btn {
   background: transparent;
   border: 1px solid color-mix(in oklab, var(--accent-danger) 50%, transparent);
   padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
-  border-radius: 4px;
+  border-radius: 2px;
   cursor: pointer;
   font-size: 0.75rem;
   color: var(--accent-danger);
   font-family: var(--font-sans);
-  transition: all 0.15s ease;
+  transition: all 0.28s var(--door);
 }
 
 .stop-tunnel-btn:hover {
@@ -372,34 +656,37 @@ td strong {
   border-color: var(--accent-danger);
 }
 
-.copy-url-btn {
-  background: transparent;
-  border: 1px solid color-mix(in oklab, var(--accent-primary) 50%, transparent);
-  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.75rem;
-  color: var(--accent-primary);
-  font-family: var(--font-sans);
-  transition: all 0.15s ease;
-}
-
-.copy-url-btn:hover {
-  background: var(--accent-primary);
-  color: var(--color-zinc-950);
-  border-color: var(--accent-primary);
-}
-
-.tunnel-url {
+/* Row-level tunnel state; actions live on the tunnel cards */
+.tunnel-badge {
   display: inline-block;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
+  border: 1px solid color-mix(in oklab, var(--color-sodium) 45%, transparent);
+  border-radius: 2px;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  color: var(--color-sodium);
+  text-decoration: none;
   white-space: nowrap;
-  vertical-align: middle;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--accent-info);
+  transition: all 0.28s var(--door);
+}
+
+.tunnel-badge:hover {
+  background: var(--color-sodium);
+  color: var(--color-ink);
+  border-color: var(--color-sodium);
+}
+
+.tunnel-badge.badge-reconnecting {
+  color: color-mix(in oklab, var(--color-sodium) 65%, var(--color-dust));
+  border-color: rgba(199, 193, 182, 0.2);
+  cursor: default;
+  animation: gutter 2.2s ease-in-out infinite;
+}
+
+.tunnel-badge.badge-reconnecting:hover {
+  background: transparent;
+  color: color-mix(in oklab, var(--color-sodium) 65%, var(--color-dust));
 }
 
 .actions-group {
@@ -409,23 +696,42 @@ td strong {
   flex-wrap: nowrap;
 }
 
-/* Logs Button */
-.logs-btn {
-  background: transparent;
-  border: 1px solid color-mix(in oklab, var(--accent-warning) 50%, transparent);
-  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.75rem;
-  color: var(--accent-warning);
-  font-family: var(--font-sans);
-  transition: all 0.15s ease;
+.log-actions {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+  margin-left: auto;
 }
 
-.logs-btn:hover {
-  background: var(--accent-warning);
-  color: var(--color-zinc-950);
-  border-color: var(--accent-warning);
+.replay-btn,
+.curl-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 1.5);
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  transition: all 0.28s var(--door);
+}
+
+.curl-btn {
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+.curl-btn:hover {
+  background: var(--text-secondary);
+  color: var(--color-ink);
+  border-color: var(--text-secondary);
+}
+
+.replay-btn:hover {
+  background: var(--text-secondary);
+  color: var(--color-ink);
+  border-color: var(--text-secondary);
 }
 
 /* Logs Panel */
@@ -435,9 +741,10 @@ td strong {
   left: 0;
   right: 0;
   height: 0;
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
-  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--color-brick-deep);
+  border-top: 1px solid var(--border-strong);
+  box-shadow: 0 -30px 60px -40px rgba(0, 0, 0, 0.9);
+  transition: height 0.55s var(--door);
   overflow: hidden;
   z-index: 100;
   display: flex;
@@ -455,8 +762,10 @@ td strong {
   padding: calc(var(--spacing) * 3) calc(var(--spacing) * 6);
   border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
-  font-weight: 600;
-  font-size: 0.875rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.125rem;
+  letter-spacing: 0.01em;
   color: var(--text-primary);
 }
 
@@ -485,11 +794,11 @@ td strong {
 
 .log-entry {
   border: 1px solid var(--border-subtle);
-  border-radius: 6px;
+  border-radius: 2px;
   margin-bottom: calc(var(--spacing) * 2);
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.28s var(--door);
 }
 
 .log-entry:hover {
@@ -506,10 +815,12 @@ td strong {
 }
 
 .log-method {
-  font-weight: 700;
+  font-family: var(--font-sans);
+  letter-spacing: 0.1em;
+  font-weight: 600;
   font-size: 0.6875rem;
   padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 2);
-  border-radius: 3px;
+  border-radius: 2px;
   min-width: 52px;
   text-align: center;
 }
@@ -532,7 +843,7 @@ td strong {
   font-weight: 600;
   font-size: 0.75rem;
   padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 2);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 .status-2xx { color: var(--accent-success); background: color-mix(in oklab, var(--accent-success) 10%, transparent); }
@@ -556,7 +867,7 @@ td strong {
   display: none;
   padding: calc(var(--spacing) * 3);
   border-top: 1px solid var(--border-subtle);
-  background: var(--bg-primary);
+  background: rgba(11, 11, 13, 0.72);
 }
 
 .log-entry.expanded .log-detail {
@@ -586,7 +897,7 @@ td strong {
   color: var(--text-secondary);
   background: var(--bg-secondary);
   padding: calc(var(--spacing) * 2) calc(var(--spacing) * 3);
-  border-radius: 4px;
+  border-radius: 2px;
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-all;
@@ -601,33 +912,23 @@ td strong {
   color: var(--accent-info);
 }
 
-/* Footer */
-footer {
-  display: flex;
-  justify-content: space-between;
-  margin-top: calc(var(--spacing) * 6);
-  padding: calc(var(--spacing) * 4) 0;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  flex-wrap: wrap;
-  gap: calc(var(--spacing) * 2);
-  border-top: 1px solid var(--border-subtle);
-}
-
 /* Toast Notification */
 .toast {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
   position: fixed;
   bottom: calc(var(--spacing) * 6);
   right: calc(var(--spacing) * 6);
   background: var(--bg-secondary);
   color: var(--text-primary);
   padding: calc(var(--spacing) * 3) calc(var(--spacing) * 5);
-  border-radius: 8px;
+  border-radius: 2px;
   border: 1px solid var(--border-color);
   font-size: 0.875rem;
   transform: translateY(100px);
   opacity: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.45s var(--door);
   backdrop-filter: blur(8px);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
 }
@@ -637,23 +938,52 @@ footer {
   opacity: 1;
 }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.toast.toast-error {
+  border-color: color-mix(in oklab, var(--accent-danger) 60%, transparent);
+  background: color-mix(in oklab, var(--accent-danger) 12%, var(--bg-secondary));
 }
 
-::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 calc(var(--spacing) * 1);
+  font-family: var(--font-sans);
+}
+
+.toast-close:hover {
+  color: var(--text-primary);
+}
+
+/* Scrollbars: a hairline held off the edge, matched on both engines */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(199, 193, 182, 0.18) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-zinc-700);
-  border-radius: 4px;
+  background: rgba(199, 193, 182, 0.18);
+  border: 4px solid transparent;
+  background-clip: content-box;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-zinc-600);
+  background: rgba(199, 193, 182, 0.34);
+  background-clip: content-box;
 }
 
 /* Responsive Design */
@@ -697,4 +1027,84 @@ footer {
 :focus-visible {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
+}
+
+/* Motion is weighted, but never mandatory */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Confirm sheet: replaces the browser's own dialog, which arrives in the
+   operating system's voice rather than this one */
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--spacing) * 6);
+  background: rgba(6, 6, 7, 0.72);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.32s var(--door);
+}
+
+.sheet[hidden] { display: none; }
+
+.sheet.open { opacity: 1; }
+
+.sheet-panel {
+  width: 100%;
+  max-width: 27rem;
+  padding: calc(var(--spacing) * 7);
+  background: linear-gradient(180deg, var(--color-brick) 0%, var(--color-concrete) 100%);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 40px 80px -50px rgba(0, 0, 0, 0.95);
+  transform: translateY(10px);
+  transition: transform 0.42s var(--door);
+}
+
+.sheet.open .sheet-panel { transform: none; }
+
+.sheet-title {
+  margin: calc(var(--spacing) * 3) 0 calc(var(--spacing) * 2);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--text-primary);
+}
+
+.sheet-body {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.sheet-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: calc(var(--spacing) * 3);
+  margin-top: calc(var(--spacing) * 7);
+}
+
+.btn-danger {
+  border-color: color-mix(in oklab, var(--accent-danger) 55%, transparent);
+  color: var(--accent-danger);
+  background: transparent;
+}
+
+.btn-danger:hover {
+  background: var(--accent-danger);
+  border-color: var(--accent-danger);
+  color: var(--color-chalk);
 }
