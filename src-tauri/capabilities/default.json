@@ -1,23 +1,44 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Capabilities for the desktop tray app (dev — invokes local `node`).",
+  "description": "Capabilities for the desktop tray app: run the bundled server sidecar (or local `node` in dev), open the dashboard, and copy its URL.",
   "windows": [],
   "permissions": [
     "core:default",
     {
       "identifier": "shell:allow-spawn",
       "allow": [
-        { "name": "node", "cmd": "node", "args": true }
+        {
+          "name": "binaries/ports-server",
+          "sidecar": true
+        },
+        {
+          "name": "node",
+          "cmd": "node",
+          "args": true
+        }
       ]
     },
     {
       "identifier": "shell:allow-kill",
       "allow": [
-        { "name": "node", "cmd": "node", "args": true }
+        {
+          "name": "binaries/ports-server",
+          "sidecar": true
+        },
+        {
+          "name": "node",
+          "cmd": "node",
+          "args": true
+        }
       ]
     },
     "opener:default",
-    "opener:allow-open-url"
+    "opener:allow-open-url",
+    "opener:allow-open-path",
+    "clipboard-manager:allow-write-text",
+    "autostart:allow-enable",
+    "autostart:allow-disable",
+    "autostart:allow-is-enabled"
   ]
 }

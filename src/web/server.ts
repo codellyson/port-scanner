@@ -9,6 +9,31 @@ import chalk from 'chalk';
 
 let serverInstance: Server | null = null;
 
+/** How often an embedded server checks that its parent is still around. */
+const PARENT_POLL_MS = 2000;
+
+/**
+ * Shuts down if the process that spawned us goes away.
+ *
+ * Only used in `--emit-ready` mode, where the tray app owns this process. A
+ * tray that is force-quit or killed mid-rebuild never gets to reap us, and the
+ * OS reparents us to init — leaving a dashboard listening on a random port
+ * with a token nobody holds, until the machine is rebooted.
+ */
+function exitWithParent(cleanup: () => Promise<void>): void {
+  const parentAtStart = process.ppid;
+  // Already orphaned, or a platform that does not reparent. Nothing to watch.
+  if (parentAtStart <= 1) return;
+
+  const timer = setInterval(() => {
+    if (process.ppid !== parentAtStart) {
+      clearInterval(timer);
+      void cleanup();
+    }
+  }, PARENT_POLL_MS);
+  timer.unref();
+}
+
 export interface StartServerOptions {
   port?: number;
   host?: string;
@@ -101,6 +126,10 @@ export function startServer(
   };
   process.on('SIGINT', cleanup);
   process.on('SIGTERM', cleanup);
+
+  if (emitReadyLine) {
+    exitWithParent(cleanup);
+  }
 }
 
 export async function stopServer(): Promise<void> {

@@ -8,6 +8,8 @@ import http from 'http';
 import crypto from 'crypto';
 import express from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
+import { Store, DEFAULT_MAX_TUNNELS } from './store';
+import { mountSignup, signupConfigFromEnv, SIGNUP_ROUTES } from './signup';
 
 const PORT = parseInt(process.env.PORT || '8443', 10);
 const HOST = process.env.HOST || '127.0.0.1';
@@ -17,9 +19,21 @@ const PUBLIC_SCHEME = process.env.PUBLIC_SCHEME || 'https';
 const REQUEST_TIMEOUT_MS = parseInt(process.env.REQUEST_TIMEOUT_MS || '30000', 10);
 const MAX_BODY_BYTES = parseInt(process.env.MAX_BODY_BYTES || String(2 * 1024 * 1024 * 1024), 10);
 const CHUNK_SIZE = 64 * 1024;
+const DB_PATH = process.env.EDGE_DB || '/opt/portscanner-edge/edge.db';
 
-if (!TOKEN) {
-  console.error('Missing EDGE_TOKEN env var.');
+const store = new Store(DB_PATH);
+
+/**
+ * `EDGE_TOKEN` is now the single-operator bootstrap credential rather than the
+ * whole auth model: it maps to one built-in account so an edge with no signups
+ * yet still works exactly as before. Per-user tokens issued from the database
+ * are checked first.
+ */
+const OWNER = TOKEN ? store.upsertUser('bootstrap', 'owner', 'owner') : null;
+if (OWNER) store.setMaxTunnels(OWNER.id, Number(process.env.OWNER_MAX_TUNNELS || 32));
+
+if (!TOKEN && process.env.ALLOW_NO_BOOTSTRAP !== '1') {
+  console.error('Missing EDGE_TOKEN env var. Set ALLOW_NO_BOOTSTRAP=1 to run with issued tokens only.');
   process.exit(1);
 }
 
@@ -32,6 +46,7 @@ interface Pending {
 interface Agent {
   ws: WebSocket;
   id: string;
+  userId: string;
   pending: Map<string, Pending>;
   accessToken?: string; // when set, tunnel requests must present this token
 }
@@ -68,10 +83,25 @@ function sendChunks(ws: WebSocket, id: string, data: Buffer): void {
   }
 }
 
-const RESERVED_IDS = new Set(['agent', 'favicon.ico', 'robots.txt', '_health', '_ping']);
+const RESERVED_IDS = new Set([
+  'agent', 'favicon.ico', 'robots.txt', '_health', '_ping',
+  ...SIGNUP_ROUTES,
+]);
 
 const app = express();
 const startedAt = Date.now();
+
+// Caddy terminates TLS and forwards; without this every client looks like
+// 127.0.0.1 and the signup rate limiter would be keyed on one bucket.
+app.set('trust proxy', 1);
+
+const PUBLIC_BASE = `${PUBLIC_SCHEME}://${BASE_DOMAIN}`;
+const AGENT_WS_URL = `${PUBLIC_SCHEME === 'https' ? 'wss' : 'ws'}://${BASE_DOMAIN}/agent`;
+const signupConfig = signupConfigFromEnv(PUBLIC_BASE);
+
+// Mounted before the tunnel catch-all so /signup and /auth/* are not read as
+// tunnel ids; RESERVED_IDS keeps anyone from claiming those ids either.
+mountSignup(app, store, signupConfig, AGENT_WS_URL);
 
 // Cheap liveness — used by Aeroplane/load-balancer healthchecks. No state.
 app.get('/_ping', (_req, res) => {
@@ -84,7 +114,8 @@ app.get('/_health', (_req, res) => {
     status: 'ok',
     uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000),
     agents: agents.size,
-    base: `${PUBLIC_SCHEME}://${BASE_DOMAIN}`,
+    base: PUBLIC_BASE,
+    signup: signupConfig ? 'github' : 'disabled',
   });
 });
 
@@ -203,24 +234,47 @@ server.on('upgrade', (req, socket, head) => {
     socket.destroy();
     return;
   }
-  if (url.searchParams.get('token') !== TOKEN) {
+  const presented = url.searchParams.get('token') || '';
+  const user =
+    (OWNER && presented && presented === TOKEN ? OWNER : null) ??
+    store.authenticate(presented);
+
+  if (!user) {
     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
     socket.destroy();
     return;
   }
-  wss.handleUpgrade(req, socket, head, (ws) => handleAgent(ws, url));
+  if (user.status === 'blocked') {
+    socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
+  // Per-account concurrency cap. Without it one signup can pin the whole box.
+  let held = 0;
+  for (const a of agents.values()) if (a.userId === user.id) held++;
+  if (held >= user.maxTunnels) {
+    socket.write('HTTP/1.1 429 Too Many Requests\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
+  wss.handleUpgrade(req, socket, head, (ws) => handleAgent(ws, url, user.id));
 });
 
-function handleAgent(ws: WebSocket, url: URL) {
+function handleAgent(ws: WebSocket, url: URL, userId: string) {
   const requested = url.searchParams.get('id') || url.searchParams.get('subdomain') || '';
-  const isValid = requested && /^[a-z0-9-]{3,40}$/i.test(requested) && !RESERVED_IDS.has(requested);
-  let id = isValid && !agents.has(requested) ? requested : randomId();
-  while (agents.has(id)) id = randomId();
+  const wellFormed = requested && /^[a-z0-9-]{3,40}$/i.test(requested) && !RESERVED_IDS.has(requested);
+  // A requested id is only granted if this account already holds it or nobody
+  // does — otherwise reconnecting agents could steal each other's URLs.
+  const mayUse = wellFormed && !agents.has(requested) && store.claimId(requested, userId);
+  let id = mayUse ? requested : randomId();
+  while (agents.has(id) || (store.idOwner(id) && store.idOwner(id) !== userId)) id = randomId();
 
   const accessToken = url.searchParams.get('access') || undefined;
-  const agent: Agent = { ws, id, pending: new Map(), accessToken };
+  const agent: Agent = { ws, id, userId, pending: new Map(), accessToken };
   agents.set(id, agent);
-  console.log(`agent connected → ${id}${accessToken ? ' (auth required)' : ''}`);
+  console.log(`agent connected → ${id} (user ${userId})${accessToken ? ' [auth required]' : ''}`);
 
   ws.send(JSON.stringify({
     type: 'welcome',
@@ -293,7 +347,8 @@ function handleAgent(ws: WebSocket, url: URL) {
 server.listen(PORT, HOST, () => {
   console.log(`Edge listening on ${HOST}:${PORT}`);
   console.log(`Public base: ${PUBLIC_SCHEME}://${BASE_DOMAIN}/<id>/...`);
-  console.log(`Agent WS:    ws(s)://${BASE_DOMAIN}/agent?token=...`);
+  console.log(`Agent WS:    ${AGENT_WS_URL}?token=...`);
+  console.log(`Signup:      ${signupConfig ? `${PUBLIC_BASE}/signup (github)` : 'disabled — set GITHUB_CLIENT_ID/SECRET'}`);
 });
 
 const shutdown = () => {

@@ -1,0 +1,81 @@
+name: Release desktop app
+
+# Tag-driven: `git tag v1.1.0 && git push --tags` builds the tray bundles and
+# attaches them to a draft release. Keep the tag in step with the `version`
+# fields in src-tauri/tauri.conf.json and src-tauri/Cargo.toml — the tag names
+# the release, but those two name the app.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  bundle:
+    permissions:
+      contents: write
+
+    strategy:
+      # One unavailable runner shouldn't cost us the other three bundles.
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest      # Apple silicon
+          - platform: macos-15-intel    # Intel Macs
+          - platform: ubuntu-22.04
+          - platform: windows-latest
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Every runner builds only for itself. scripts/package-sidecar.js names
+      # the sidecar from `rustc --print host-tuple`, and Tauri looks for the
+      # *target* triple — so cross-compiling here would produce a binary the
+      # bundler cannot find. Native runners keep the two in agreement.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ./src-tauri -> target
+
+      - name: Install Linux build dependencies
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      # tauri.conf.json's beforeBuildCommand runs `npm run build &&
+      # npm run package:sidecar`, both of which need node_modules present.
+      - name: Install npm dependencies
+        run: npm ci
+
+      - uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: Port Scanner ${{ github.ref_name }}
+          releaseBody: |
+            Desktop tray app. Download the bundle for your platform below.
+
+            macOS builds are unsigned — see the README for the one-time
+            Gatekeeper step, or sign them by adding APPLE_* secrets here.
+          releaseDraft: true
+          prerelease: false

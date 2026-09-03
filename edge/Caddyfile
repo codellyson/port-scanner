@@ -1,28 +1,31 @@
 # Caddyfile for the port-scanner tunnel edge.
 #
-# Replace `tunnel.example.com` everywhere with your real apex.
-# You need wildcard TLS (DNS-01 challenge) for `*.tunnel.example.com`.
-# Pick the Caddy DNS plugin matching your registrar (cloudflare, route53, etc.)
-# and set the provider's API token via env.
+# One hostname, one ordinary certificate. The edge routes by path — the first
+# segment of the URL is the tunnel id (`/abc123/api/x` reaches agent abc123 as
+# `/api/x`) — so there are no per-tunnel subdomains and nothing here needs a
+# wildcard cert, a DNS-01 challenge, or a DNS-provider plugin. Stock Caddy from
+# apt is enough; `xcaddy` is not.
 #
-# Build Caddy with the DNS plugin baked in:
-#   xcaddy build --with github.com/caddy-dns/cloudflare
-# (Replace `cloudflare` with your provider's plugin path.)
+# Caddy issues over HTTP-01/TLS-ALPN-01 on its own, which needs two things:
+#   - ports 80 and 443 reachable from the internet
+#   - an A record pointing straight at this VPS, not proxied by a CDN
+#     (in Cloudflare terms: DNS-only / grey cloud, not orange)
+#
+# A `*.portscanner.kreativekorna.com` wildcard record also exists. Path routing
+# does not use it, and it is deliberately not listed below: naming it here would
+# make Caddy try to get a wildcard certificate, which only DNS-01 can satisfy —
+# reintroducing the provider plugin and API token this config exists to avoid.
+# The wildcard becomes relevant only if tunnels ever move to per-tunnel
+# subdomains.
+#
+# Changing domains means editing the hostname below and BASE_DOMAIN in
+# /etc/portscanner-edge.env; they must agree, because the edge builds the
+# public URLs it hands to clients out of BASE_DOMAIN.
+#
+# reverse_proxy needs no extra configuration here: it upgrades WebSocket
+# connections on /agent by itself, passes the original Host through to an
+# HTTP upstream, and sets X-Forwarded-For/-Proto/-Host.
 
-{
-	# Optional: redirect ACME challenge logs to journald
-	# email you@example.com
-}
-
-# Agent WebSocket lives under the apex.
-tunnel.example.com {
-	reverse_proxy 127.0.0.1:8443
-}
-
-# Public tunnel traffic. Wildcard cert via DNS-01.
-*.tunnel.example.com {
-	tls {
-		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-	}
+portscanner.kreativekorna.com {
 	reverse_proxy 127.0.0.1:8443
 }
