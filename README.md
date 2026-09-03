@@ -84,12 +84,13 @@ quietly tries again later. Dev builds show the item disabled.
 
 Updates are minisign-signed. The public key lives in
 `src-tauri/tauri.conf.json`; the private key must never enter the repo. To
-release signed bundles from CI, add two repository secrets:
-
-| Secret | Value |
-|---|---|
-| `TAURI_SIGNING_PRIVATE_KEY` | contents of the private key file |
-| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | its password (empty if none) |
+release signed bundles from CI, add one repository secret,
+`TAURI_SIGNING_PRIVATE_KEY`, holding the contents of the private key file.
+The key has no password, and the workflow sets
+`TAURI_SIGNING_PRIVATE_KEY_PASSWORD` to an empty string itself — the CLI
+needs the variable present (unset, it tries to prompt) but empty (anything
+else is "Wrong password for that key"). If you ever generate a key *with* a
+password, switch that line back to a secret.
 
 A local `cargo tauri build` needs the key too, since
 `bundle.createUpdaterArtifacts` is on. The bundler reads the key *contents*
@@ -99,6 +100,7 @@ from `TAURI_SIGNING_PRIVATE_KEY`; the `_PATH` variant is only understood by
 
 ```bash
 export TAURI_SIGNING_PRIVATE_KEY="$(cat "$HOME/.tauri/portscanner.key")"
+export TAURI_SIGNING_PRIVATE_KEY_PASSWORD=""
 npm run tauri:build
 ```
 

@@ -5,6 +5,8 @@
 //! actually doing, and every action that cannot work right now is disabled
 //! rather than failing silently when clicked.
 
+use std::path::Path;
+
 use tauri::image::Image;
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
@@ -195,11 +197,7 @@ fn on_menu_event(app: &AppHandle, event: tauri::menu::MenuEvent) {
         "restart" => sidecar::restart(app),
 
         "edge" => match sidecar::ensure_edge_env_file(app) {
-            Ok(path) => {
-                if let Err(err) = app.opener().open_path(path.to_string_lossy(), None::<&str>) {
-                    eprintln!("Failed to open edge config: {err}");
-                }
-            }
+            Ok(path) => open_in_text_editor(app, &path),
             Err(err) => eprintln!("Failed to create edge config: {err}"),
         },
 
@@ -210,6 +208,33 @@ fn on_menu_event(app: &AppHandle, event: tauri::menu::MenuEvent) {
         "quit" => sidecar::quit(app),
 
         _ => {}
+    }
+}
+
+/// Opens `edge.env` for editing. Nothing claims the `.env` extension on macOS
+/// (and usually nothing on Windows), so a plain "open" fails — and in a tray
+/// app a failure that only reaches stderr looks exactly like a click that
+/// did nothing. Ask for the text editor instead, and if even that fails,
+/// reveal the file so there is at least something on screen.
+fn open_in_text_editor(app: &AppHandle, path: &Path) {
+    #[cfg(target_os = "macos")]
+    {
+        // `open -t` uses whatever the user picked for plain-text files.
+        let status = std::process::Command::new("open")
+            .arg("-t")
+            .arg(path)
+            .status();
+        if matches!(status, Ok(s) if s.success()) {
+            return;
+        }
+    }
+
+    let with: Option<&str> = if cfg!(windows) { Some("notepad") } else { None };
+    if let Err(err) = app.opener().open_path(path.to_string_lossy(), with) {
+        eprintln!("Failed to open edge config in an editor: {err}");
+        if let Err(err) = app.opener().reveal_item_in_dir(path) {
+            eprintln!("Failed to reveal edge config: {err}");
+        }
     }
 }
 
