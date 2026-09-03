@@ -1,6 +1,6 @@
 [package]
 name = "port-scanner-desktop"
-version = "1.0.7"
+version = "1.0.8"
 description = "Desktop tray app wrapping the port-scanner web dashboard"
 edition = "2021"
 rust-version = "1.77.2"

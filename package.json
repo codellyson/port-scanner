@@ -1,6 +1,6 @@
 {
   "name": "port-scanner-cli",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": true,
   "description": "Personal port utility + self-hosted tunnel edge. Not published.",
   "main": "dist/index.js",
