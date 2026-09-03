@@ -2827,7 +2827,7 @@ dependencies = [
 
 [[package]]
 name = "port-scanner-desktop"
-version = "1.0.5"
+version = "1.0.7"
 dependencies = [
  "libc",
  "rand",
