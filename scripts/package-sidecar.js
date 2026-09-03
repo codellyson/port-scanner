@@ -49,8 +49,12 @@ async function main() {
   const output = path.join(outDir, `ports-server-${triple}${ext}`);
 
   console.log(`Packaging sidecar → ${path.relative(root, output)} (${pkgTarget})`);
+  // pkg only reads the `pkg.assets` list (the dashboard's HTML/CSS/JS) from
+  // package.json when told where it is; given a bare entry file it silently
+  // ships a binary that crashes on the first readFileSync of dashboard.html.
   await exec([
     entry,
+    '--config', path.join(root, 'package.json'),
     '--targets', pkgTarget,
     '--output', output,
     '--compress', 'GZip',
