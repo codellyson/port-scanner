@@ -85,7 +85,7 @@ jobs:
           # latest.json is what installed apps poll. It only resolves through
           # releases/latest/download/ once the release is published — which
           # the `publish` job below does after all four bundles are in.
-          includeUpdaterJson: true
+          uploadUpdaterJson: true
           releaseName: Port Scanner ${{ github.ref_name }}
           releaseBody: |
             Desktop tray app. Download the bundle for your platform below.
