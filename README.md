@@ -57,7 +57,7 @@ npm run tauri:build    # build the .app / .dmg / installer
 
 Tagged builds are produced by [`.github/workflows/release.yml`](.github/workflows/release.yml):
 push a `v*` tag and it bundles for Apple silicon, Intel macOS, Linux and
-Windows on native runners, then attaches them to a draft release. Keep the tag
+Windows on native runners, then publishes the release. Keep the tag
 in step with the `version` in `src-tauri/tauri.conf.json` and
 `src-tauri/Cargo.toml`.
 
@@ -104,8 +104,10 @@ export TAURI_SIGNING_PRIVATE_KEY_PASSWORD=""
 npm run tauri:build
 ```
 
-The release workflow creates a **draft**. Installed apps only see it after
-you publish the draft, so check the bundles first, then publish. Lose the
+The release workflow uploads to a draft and publishes it automatically once
+all four platforms have finished. If any platform fails, it stays a draft —
+installed apps never see a release missing their bundle — and you can
+re-run the failed job or publish by hand after fixing it. Lose the
 private key and no existing install can ever update again — generate a new
 pair with `cargo tauri signer generate -w ~/.tauri/portscanner.key`, swap
 the pubkey in the config, and users reinstall once by hand.
