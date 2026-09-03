@@ -67,12 +67,9 @@ body {
   line-height: 1.5;
   min-height: 100vh;
   background-image:
-    radial-gradient(120% 70% at 6% -10%, rgba(231, 162, 60, 0.07), transparent 62%),
-    radial-gradient(90% 60% at 100% 0%, rgba(36, 26, 22, 0.85), transparent 58%),
     linear-gradient(rgba(199, 193, 182, 0.016) 1px, transparent 1px),
     linear-gradient(90deg, rgba(199, 193, 182, 0.016) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 96px 96px, 96px 96px;
-  background-attachment: fixed, fixed, scroll, scroll;
+  background-size: 96px 96px;
 }
 
 /* Grain: the page is photographed under a work lamp, not printed */
@@ -252,7 +249,7 @@ header h1 {
 }
 
 .tunnel-card {
-  background: linear-gradient(180deg, rgba(36, 26, 22, 0.5), var(--bg-secondary));
+  background: var(--bg-secondary);
   border: 1px solid color-mix(in oklab, var(--color-sodium) 22%, transparent);
   border-radius: 2px;
   padding: calc(var(--spacing) * 4);
