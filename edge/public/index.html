@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Port Scanner</title>
+<meta name="description" content="A tray app and CLI that lists what is listening on your machine, ends the process in one click, and can turn a local port into a public link.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700&family=Geist:wght@400;500&family=Geist+Mono:wght@400&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    /* Palette from the dashboard stylesheet: ink, concrete, brick, chalk, plaster, dust, sodium */
+    --bg: #0B0B0D; --panel: #16161A; --brick: #241A16;
+    --line: rgba(199,193,182,.12); --line-2: rgba(199,193,182,.28);
+    --text: #F1EDE5; --muted: #C7C1B6; --faint: #8A857C;
+    --accent: #E7A23C; --accent-text: #F3BC68; --accent-bright: #F3BC68; --on-accent: #0B0B0D;
+    --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+    --body: "Geist", "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    --mono: "Geist Mono", "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      color-scheme: light;
+      --bg: #F1EDE5; --panel: #FAF8F3; --brick: #EFE4D6;
+      --line: rgba(11,11,13,.12); --line-2: rgba(11,11,13,.26);
+      --text: #0B0B0D; --muted: #4F4B44; --faint: #8A857C;
+      --accent: #E7A23C; --accent-text: #9A5F0E; --accent-bright: #F3BC68; --on-accent: #0B0B0D;
+    }
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #F1EDE5; --panel: #FAF8F3; --brick: #EFE4D6;
+    --line: rgba(11,11,13,.12); --line-2: rgba(11,11,13,.26);
+    --text: #0B0B0D; --muted: #4F4B44; --faint: #8A857C;
+    --accent: #E7A23C; --accent-text: #9A5F0E; --accent-bright: #F3BC68; --on-accent: #0B0B0D;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--body); font-size: 1.05rem; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  a:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 3px; border-radius: 6px; }
+  h1, h2 { font-family: var(--display); letter-spacing: -.02em; text-wrap: balance; margin: 0; }
+  p { margin: 0; text-wrap: pretty; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 40px); }
+
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 600; font-size: 1.05rem; }
+  .brand svg { width: 26px; height: 26px; }
+  .nav a.gh { font-size: .92rem; color: var(--muted); text-decoration: none; }
+  .nav a.gh:hover { color: var(--text); }
+
+  .hero { padding: clamp(56px, 12vw, 128px) 0 clamp(48px, 8vw, 88px); }
+  .hero h1 { font-size: clamp(2.3rem, 6vw, 3.9rem); line-height: 1.04; font-weight: 700; margin-bottom: 22px; max-width: 16ch; }
+  .hero h1 span { color: var(--accent-text); }
+  .hero p { color: var(--muted); max-width: 46ch; font-size: clamp(1.05rem, 1.6vw, 1.2rem); }
+  .btn { display: inline-flex; align-items: center; padding: 12px 20px; border-radius: 8px; font-weight: 500; font-size: .98rem; text-decoration: none; border: 1px solid var(--line-2); color: var(--text); background: var(--panel); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .btn.primary:hover { background: var(--accent-bright); border-color: var(--accent-bright); }
+  .btn:hover { border-color: var(--accent); }
+  .hero .actions { margin-top: 30px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .hero .platforms { margin-top: 14px; font-family: var(--mono); font-size: .8rem; color: var(--faint); }
+
+  .features { border-top: 1px solid var(--line); padding: clamp(40px, 7vw, 72px) 0; display: grid; gap: clamp(28px, 4vw, 40px); }
+  .feature { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: 16px 24px; align-items: baseline; }
+  .feature h2 { font-size: 1.25rem; font-weight: 600; }
+  .feature p { color: var(--muted); max-width: 52ch; }
+
+  .install { border-top: 1px solid var(--line); padding: clamp(40px, 7vw, 72px) 0; }
+  .install h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; }
+  .install p { color: var(--muted); max-width: 54ch; }
+  .install pre { margin: 20px 0 0; background: var(--brick); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; font-family: var(--mono); font-size: .84rem; line-height: 1.7; overflow-x: auto; }
+  .install .note { margin-top: 18px; font-size: .9rem; color: var(--faint); }
+  .install .note code { font-family: var(--mono); font-size: .82rem; color: var(--muted); }
+
+  footer { border-top: 1px solid var(--line); padding: 24px 0 48px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; font-size: .84rem; color: var(--faint); }
+  footer a { text-decoration: none; color: var(--muted); }
+  footer a:hover { color: var(--text); }
+
+  @media (max-width: 600px) {
+    .feature { grid-template-columns: 1fr; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="nav">
+    <a class="brand" href="#top" id="top"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1E1E24"/>
+      <stop offset="1" stop-color="#0B0B0D"/>
+    </linearGradient>
+    <linearGradient id="sweep" gradientUnits="userSpaceOnUse" x1="440" y1="300" x2="780" y2="380">
+      <stop offset="0" stop-color="#4FB093" stop-opacity="0"/>
+      <stop offset="1" stop-color="#4FB093" stop-opacity="0.55"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#4FB093" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#4FB093" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#bg)"/>
+  <rect x="70" y="70" width="884" height="884" rx="194" fill="none" stroke="#FFFFFF" stroke-opacity="0.07" stroke-width="12"/>
+  <g stroke="#C7C1B6" stroke-opacity="0.14" fill="none" stroke-width="10">
+    <line x1="512" y1="222" x2="512" y2="802"/>
+    <line x1="222" y1="512" x2="802" y2="512"/>
+    <circle cx="512" cy="512" r="100"/>
+    <circle cx="512" cy="512" r="200"/>
+  </g>
+  <circle cx="512" cy="512" r="300" fill="none" stroke="#4FB093" stroke-opacity="0.85" stroke-width="22"/>
+  <path d="M512,512 L459.9,216.6 A300,300 0 0 1 771.8,362 Z" fill="url(#sweep)"/>
+  <line x1="512" y1="512" x2="771.8" y2="362" stroke="#4FB093" stroke-width="22" stroke-linecap="round"/>
+  <circle cx="512" cy="512" r="26" fill="#4FB093"/>
+  <circle cx="674.6" cy="349.4" r="80" fill="url(#glow)"/>
+  <circle cx="674.6" cy="349.4" r="40" fill="#4FB093"/>
+  <circle cx="338.8" cy="612" r="28" fill="#E7A23C" fill-opacity="0.9"/>
+</svg> Port Scanner</a>
+    <a class="gh" href="https://github.com/codellyson/port-scanner">GitHub</a>
+  </header>
+
+  <section class="hero">
+    <h1>See what's listening on your machine. <span>Close it, or share it.</span></h1>
+    <p>Port Scanner is a tray app and CLI for macOS, Linux and Windows. It lists every open port with the process behind it, lets you end that process in one click, and can turn a local port into a public link when you need one.</p>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/codellyson/port-scanner/releases/latest">Download</a>
+      <a class="btn" href="#install">Build from source</a>
+    </div>
+    <p class="platforms">v1.0.9 &middot; MIT &middot; free</p>
+  </section>
+
+  <section class="features">
+    <div class="feature">
+      <h2>List</h2>
+      <p>Every port, with protocol, state, process name and the path of the executable that opened it. Filter by any of them, or get JSON for scripts.</p>
+    </div>
+    <div class="feature">
+      <h2>Kill</h2>
+      <p>See the name and the path before you act, then end the process from the row. No process ids to look up.</p>
+    </div>
+    <div class="feature">
+      <h2>Expose</h2>
+      <p>Get an HTTPS link that reaches a local port. Every link carries its own key. Close the tunnel and the link stops working.</p>
+    </div>
+  </section>
+
+  <section class="install" id="install">
+    <h2>Install</h2>
+    <p>Native builds for Apple silicon and Intel Macs, Linux and Windows are attached to <a href="https://github.com/codellyson/port-scanner/releases/latest">every release</a>. To build the CLI and dashboard yourself, you need Node 18 or newer.</p>
+    <pre>git clone https://github.com/codellyson/port-scanner
+cd port-scanner
+npm install &amp;&amp; npm run build
+node dist/index.js web --token "$(openssl rand -hex 16)"</pre>
+    <p class="note">The app is unsigned. macOS quarantines it on first launch: right-click it and choose Open, or run <code>xattr -dr com.apple.quarantine "/Applications/Port Scanner.app"</code> once.</p>
+  </section>
+
+  <footer>
+    <span>Port Scanner &middot; built by codellyson</span>
+    <span><a href="https://github.com/codellyson/port-scanner">Source</a> &nbsp;&middot;&nbsp; <a href="https://github.com/codellyson/port-scanner/issues">Issues</a> &nbsp;&middot;&nbsp; <a href="/signup">Sign in for tunnels</a></span>
+  </footer>
+</div>
+</body>
+</html>
