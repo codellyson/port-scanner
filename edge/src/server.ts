@@ -86,7 +86,7 @@ function sendChunks(ws: WebSocket, id: string, data: Buffer): void {
 }
 
 const RESERVED_IDS = new Set([
-  'agent', 'favicon.ico', 'favicon.svg', 'robots.txt', '_health', '_ping',
+  'agent', 'favicon.ico', 'favicon.svg', 'og.png', 'robots.txt', '_health', '_ping',
   ...SIGNUP_ROUTES,
 ]);
 
@@ -126,17 +126,19 @@ app.get('/_health', (_req, res) => {
 // through to the plain-text banner below rather than failing the edge.
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const LANDING = path.join(PUBLIC_DIR, 'index.html');
-const FAVICON = path.join(PUBLIC_DIR, 'favicon.svg');
 app.get('/', (_req, res, next) => {
   if (!fs.existsSync(LANDING)) return next();
   res.set('Cache-Control', 'public, max-age=300');
   res.sendFile(LANDING);
 });
-app.get('/favicon.svg', (_req, res, next) => {
-  if (!fs.existsSync(FAVICON)) return next();
-  res.set('Cache-Control', 'public, max-age=86400');
-  res.sendFile(FAVICON);
-});
+for (const file of ['favicon.svg', 'og.png']) {
+  const full = path.join(PUBLIC_DIR, file);
+  app.get('/' + file, (_req, res, next) => {
+    if (!fs.existsSync(full)) return next();
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.sendFile(full);
+  });
+}
 
 // Public HTTP traffic — first path segment is the tunnel id. `/abc123/api/x?q=1`
 // reaches agent abc123 as `/api/x?q=1`.
