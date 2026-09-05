@@ -46,7 +46,9 @@
 
   .nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
   .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 600; font-size: 1.05rem; }
-  .brand svg { width: 26px; height: 26px; }
+  .brand svg { width: 26px; height: 26px; border-radius: 7px; filter: drop-shadow(0 3px 6px rgba(0,0,0,.45)); animation: buoy 4.5s ease-in-out infinite; }
+  @keyframes buoy { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-3px) } }
+  @media (prefers-reduced-motion: reduce) { .brand svg { animation: none; } }
   .nav a.gh { font-size: .92rem; color: var(--muted); text-decoration: none; }
   .nav a.gh:hover { color: var(--text); }
 
