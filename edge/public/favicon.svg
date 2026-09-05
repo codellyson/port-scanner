@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Source of truth for every app icon. Regenerate with: cargo tauri icon src-tauri/icons/app-icon.svg -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1E1E24"/>
+      <stop offset="1" stop-color="#0B0B0D"/>
+    </linearGradient>
+    <linearGradient id="sweep" gradientUnits="userSpaceOnUse" x1="440" y1="300" x2="780" y2="380">
+      <stop offset="0" stop-color="#4FB093" stop-opacity="0"/>
+      <stop offset="1" stop-color="#4FB093" stop-opacity="0.55"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#4FB093" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#4FB093" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Squircle body -->
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#bg)"/>
+  <rect x="70" y="70" width="884" height="884" rx="194" fill="none" stroke="#FFFFFF" stroke-opacity="0.07" stroke-width="12"/>
+
+  <!-- Radar grid -->
+  <g stroke="#C7C1B6" stroke-opacity="0.14" fill="none" stroke-width="10">
+    <line x1="512" y1="222" x2="512" y2="802"/>
+    <line x1="222" y1="512" x2="802" y2="512"/>
+    <circle cx="512" cy="512" r="100"/>
+    <circle cx="512" cy="512" r="200"/>
+  </g>
+  <circle cx="512" cy="512" r="300" fill="none" stroke="#4FB093" stroke-opacity="0.85" stroke-width="22"/>
+
+  <!-- Sweep -->
+  <path d="M512,512 L459.9,216.6 A300,300 0 0 1 771.8,362 Z" fill="url(#sweep)"/>
+  <line x1="512" y1="512" x2="771.8" y2="362" stroke="#4FB093" stroke-width="22" stroke-linecap="round"/>
+  <circle cx="512" cy="512" r="26" fill="#4FB093"/>
+
+  <!-- Open port just found -->
+  <circle cx="674.6" cy="349.4" r="80" fill="url(#glow)"/>
+  <circle cx="674.6" cy="349.4" r="40" fill="#4FB093"/>
+
+  <!-- Older hit, fading -->
+  <circle cx="338.8" cy="612" r="28" fill="#E7A23C" fill-opacity="0.9"/>
+</svg>

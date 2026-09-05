@@ -6,6 +6,8 @@
  */
 import http from 'http';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import express from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import { Store, DEFAULT_MAX_TUNNELS } from './store';
@@ -84,7 +86,7 @@ function sendChunks(ws: WebSocket, id: string, data: Buffer): void {
 }
 
 const RESERVED_IDS = new Set([
-  'agent', 'favicon.ico', 'robots.txt', '_health', '_ping',
+  'agent', 'favicon.ico', 'favicon.svg', 'og.png', 'robots.txt', '_health', '_ping',
   ...SIGNUP_ROUTES,
 ]);
 
@@ -118,6 +120,25 @@ app.get('/_health', (_req, res) => {
     signup: signupConfig ? 'github' : 'disabled',
   });
 });
+
+// Landing page and favicon, copied into dist/public by the build. Served only
+// at the exact root so tunnel ids stay one segment deep; a missing file falls
+// through to the plain-text banner below rather than failing the edge.
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const LANDING = path.join(PUBLIC_DIR, 'index.html');
+app.get('/', (_req, res, next) => {
+  if (!fs.existsSync(LANDING)) return next();
+  res.set('Cache-Control', 'public, max-age=300');
+  res.sendFile(LANDING);
+});
+for (const file of ['favicon.svg', 'og.png']) {
+  const full = path.join(PUBLIC_DIR, file);
+  app.get('/' + file, (_req, res, next) => {
+    if (!fs.existsSync(full)) return next();
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.sendFile(full);
+  });
+}
 
 // Public HTTP traffic — first path segment is the tunnel id. `/abc123/api/x?q=1`
 // reaches agent abc123 as `/api/x?q=1`.
